@@ -125,6 +125,102 @@ public interface SCS_API {
     Map<UUID, LocalDateTime> getClaimBanned(UUID ownerUuid, String claimName);
 
 
+    // **************************
+    // *  Claim - Modification *
+    // **************************
+
+
+    /**
+     * Adds a member to a claim (asynchronous).
+     * Persists to database and updates cache.
+     *
+     * @param claim The claim.
+     * @param memberUuid The UUID of the member to add.
+     * @param role The role to assign (MEMBER, MODERATOR).
+     * @return A CompletableFuture that completes when the operation is done.
+     */
+    CompletableFuture<Void> addMember(Claim claim, UUID memberUuid, ClaimRole role);
+
+    /**
+     * Adds a member to all claims owned by a player (asynchronous).
+     *
+     * @param ownerUuid The owner's UUID.
+     * @param memberUuid The UUID of the member to add.
+     * @param role The role to assign.
+     * @return A CompletableFuture that completes when the operation is done.
+     */
+    CompletableFuture<Void> addMemberToAllClaims(UUID ownerUuid, UUID memberUuid, ClaimRole role);
+
+    /**
+     * Removes a member from a claim (asynchronous).
+     * Persists to database and updates cache.
+     *
+     * @param claim The claim.
+     * @param memberUuid The UUID of the member to remove.
+     * @return A CompletableFuture that completes when the operation is done.
+     */
+    CompletableFuture<Void> removeMember(Claim claim, UUID memberUuid);
+
+    /**
+     * Removes a member from all claims owned by a player (asynchronous).
+     *
+     * @param ownerUuid The owner's UUID.
+     * @param memberUuid The UUID of the member to remove.
+     * @return A CompletableFuture that completes when the operation is done.
+     */
+    CompletableFuture<Void> removeMemberFromAllClaims(UUID ownerUuid, UUID memberUuid);
+
+    /**
+     * Changes the role of a member in a claim (asynchronous).
+     *
+     * @param claim The claim.
+     * @param memberUuid The UUID of the member.
+     * @param newRole The new role.
+     * @return A CompletableFuture that completes when the operation is done.
+     */
+    CompletableFuture<Void> setMemberRole(Claim claim, UUID memberUuid, ClaimRole newRole);
+
+    /**
+     * Bans a player from a claim (asynchronous).
+     *
+     * @param claim The claim.
+     * @param playerUuid The UUID of the player to ban.
+     * @param expiration The expiration date of the ban.
+     * @return A CompletableFuture that completes when the operation is done.
+     */
+    CompletableFuture<Void> banPlayer(Claim claim, UUID playerUuid, LocalDateTime expiration);
+
+    /**
+     * Unbans a player from a claim (asynchronous).
+     *
+     * @param claim The claim.
+     * @param playerUuid The UUID of the player to unban.
+     * @return A CompletableFuture that completes when the operation is done.
+     */
+    CompletableFuture<Void> unbanPlayer(Claim claim, UUID playerUuid);
+
+    /**
+     * Sets a permission value for a role in a claim (asynchronous).
+     *
+     * @param claim The claim.
+     * @param role The role.
+     * @param permission The permission key.
+     * @param value The permission value.
+     * @return A CompletableFuture that completes when the operation is done.
+     */
+    CompletableFuture<Void> setPermission(Claim claim, ClaimRole role, String permission, boolean value);
+
+    /**
+     * Sets a flag value for a claim (asynchronous).
+     *
+     * @param claim The claim.
+     * @param flag The flag key.
+     * @param value The flag value.
+     * @return A CompletableFuture that completes when the operation is done.
+     */
+    CompletableFuture<Void> setFlag(Claim claim, String flag, boolean value);
+
+
     // *********************
     // *  Claim - Checks  *
     // *********************
