@@ -20,7 +20,7 @@ This module allows developers to integrate with SimpleClaimSystem from their own
     <dependency>
         <groupId>com.github.Xyness</groupId>
         <artifactId>SimpleClaimSystem-API</artifactId>
-        <version>v2.0.28</version>
+        <version>v2.1.0</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
@@ -34,7 +34,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.Xyness:SimpleClaimSystem-API:v2.0.28'
+    compileOnly 'com.github.Xyness:SimpleClaimSystem-API:v2.1.0'
 }
 ```
 
@@ -46,7 +46,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.Xyness:SimpleClaimSystem-API:v2.0.28")
+    compileOnly("com.github.Xyness:SimpleClaimSystem-API:v2.1.0")
 }
 ```
 
@@ -286,7 +286,7 @@ String lang = api.getStringSetting("lang", "en_US");
 ## Links
 
 - [SpigotMC](https://www.spigotmc.org/resources/simple-claim-system.118087/)
-- [Javadoc](https://javadoc.jitpack.io/com/github/Xyness/SimpleClaimSystem-API/v2.0.28/javadoc/)
+- [Javadoc](https://javadoc.jitpack.io/com/github/Xyness/SimpleClaimSystem-API/v2.1.0/javadoc/)
 
 ## License
 
