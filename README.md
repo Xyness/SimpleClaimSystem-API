@@ -20,7 +20,7 @@ This module allows developers to integrate with SimpleClaimSystem from their own
     <dependency>
         <groupId>com.github.Xyness</groupId>
         <artifactId>SimpleClaimSystem-API</artifactId>
-        <version>v2.1.0</version>
+        <version>v2.1.1</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
@@ -34,7 +34,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.Xyness:SimpleClaimSystem-API:v2.1.0'
+    compileOnly 'com.github.Xyness:SimpleClaimSystem-API:v2.1.1'
 }
 ```
 
@@ -46,7 +46,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.Xyness:SimpleClaimSystem-API:v2.1.0")
+    compileOnly("com.github.Xyness:SimpleClaimSystem-API:v2.1.1")
 }
 ```
 
@@ -163,6 +163,45 @@ ClaimRole role = api.getRole(chunk, playerId);
 Boolean pvp = api.getFlag(chunk, "pvp");
 ```
 
+### Manage members (Factions/Kingdoms integration)
+
+```java
+// Add a faction member to all claims owned by the leader
+api.addMemberToAllClaims(leaderUuid, newMemberUuid, ClaimRole.MEMBER);
+
+// Remove a member who left the faction from all claims
+api.removeMemberFromAllClaims(leaderUuid, leavingMemberUuid);
+
+// Add a member to a specific claim
+Optional<Claim> opt = api.getClaimByOwnerAndName(ownerUuid, "My Base");
+opt.ifPresent(claim -> {
+    api.addMember(claim, memberUuid, ClaimRole.MEMBER);
+});
+
+// Promote a member to moderator
+api.setMemberRole(claim, memberUuid, ClaimRole.MODERATOR);
+```
+
+### Manage bans
+
+```java
+// Ban a player from a claim for 7 days
+api.banPlayer(claim, enemyUuid, LocalDateTime.now().plusDays(7));
+
+// Unban a player
+api.unbanPlayer(claim, playerUuid);
+```
+
+### Modify permissions and flags
+
+```java
+// Allow members to build in a claim
+api.setPermission(claim, ClaimRole.MEMBER, "build", true);
+
+// Disable PvP in a claim
+api.setFlag(claim, "pvp", false);
+```
+
 ### Player limits and statistics
 
 ```java
@@ -217,6 +256,20 @@ String lang = api.getStringSetting("lang", "en_US");
 | `getClaimNamesByOwner(UUID)` | Sync | Get claim names by owner |
 | `getClaimMembers(UUID, String)` | Sync | Get members of a claim |
 | `getClaimBanned(UUID, String)` | Sync | Get banned players of a claim |
+
+### Claim Modification
+
+| Method | Description |
+|--------|-------------|
+| `addMember(Claim, UUID, ClaimRole)` | Add a member to a claim |
+| `addMemberToAllClaims(UUID, UUID, ClaimRole)` | Add a member to all claims of an owner |
+| `removeMember(Claim, UUID)` | Remove a member from a claim |
+| `removeMemberFromAllClaims(UUID, UUID)` | Remove a member from all claims of an owner |
+| `setMemberRole(Claim, UUID, ClaimRole)` | Change a member's role |
+| `banPlayer(Claim, UUID, LocalDateTime)` | Ban a player from a claim |
+| `unbanPlayer(Claim, UUID)` | Unban a player from a claim |
+| `setPermission(Claim, ClaimRole, String, boolean)` | Set a permission for a role |
+| `setFlag(Claim, String, boolean)` | Set a flag value |
 
 ### Claim Checks
 
@@ -285,8 +338,8 @@ String lang = api.getStringSetting("lang", "en_US");
 
 ## Links
 
-- [SpigotMC](https://www.spigotmc.org/resources/simple-claim-system.118087/)
-- [Javadoc](https://javadoc.jitpack.io/com/github/Xyness/SimpleClaimSystem-API/v2.1.0/javadoc/)
+- [BuiltByBit](https://builtbybit.com/resources/simpleclaimsystem.92437/)
+- [Javadoc](https://javadoc.jitpack.io/com/github/Xyness/SimpleClaimSystem-API/v2.1.1/javadoc/)
 
 ## License
 
