@@ -1,17 +1,14 @@
 # Version
-version: 2.1.1
+version: 2.1.2
 
 # Update date
-date: 30/03/2026
+date: 31/03/2026
 
 # Update notes
 update-notes:
-- Separated API from plugin for public distribution
-- Thread safety fixes (ConcurrentHashMap, volatile fields, atomic operations)
-- Exception handling improvements (DAO propagation, removed printStackTrace)
-- Fixed stacked slimes not splitting correctly
-- Fixed Iron/Snow Golems stacking when player-built
-- Fixed Fire Aspect only dropping 1 cooked meat on stacked mobs
-- Fixed tamed wolves being stacked
-- Fixed race condition when claiming in the Nether
-- Fixed bees unable to fill hives with honey in claims
+- Added 16 custom Bukkit events for all claim actions
+- ClaimEnterEvent and ClaimTeleportEvent are cancellable
+- ClaimMemberEvent covers ADD, REMOVE, KICK, BAN, UNBAN, PROMOTE, DEMOTE
+- ClaimSaleEvent covers LISTED, CANCELLED, BOUGHT
+- ClaimChunkEvent covers ADD, REMOVE
+- Updated README with full events documentation and examples
