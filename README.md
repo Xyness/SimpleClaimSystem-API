@@ -320,6 +320,122 @@ String lang = api.getStringSetting("lang", "en_US");
 | `getIntSetting(String, int)` | Get integer setting |
 | `getDoubleSetting(String, double)` | Get double setting |
 
+## Events
+
+SimpleClaimSystem fires custom Bukkit events for all claim actions. Listen to them in your plugin to react to claim changes.
+
+### Available Events
+
+| Event | Description | Cancellable |
+|-------|-------------|:-----------:|
+| `ClaimCreateEvent` | Fired when a claim is created | No |
+| `ClaimDeleteEvent` | Fired when a claim is deleted | No |
+| `ClaimExpireEvent` | Fired when a claim is auto-purged due to owner inactivity | No |
+| `ClaimEnterEvent` | Fired when a player enters a claim | Yes |
+| `ClaimLeaveEvent` | Fired when a player leaves a claim | No |
+| `ClaimTeleportEvent` | Fired when a player teleports to a claim spawn | Yes |
+| `ClaimMemberEvent` | Fired when a member is added, removed, kicked, banned, unbanned, promoted, or demoted | No |
+| `ClaimOwnerTransferEvent` | Fired when claim ownership is transferred | No |
+| `ClaimSaleEvent` | Fired when a claim is listed for sale, sale cancelled, or bought | No |
+| `ClaimRenameEvent` | Fired when a claim is renamed | No |
+| `ClaimDescriptionChangeEvent` | Fired when a claim description is changed | No |
+| `ClaimSpawnChangeEvent` | Fired when a claim spawn location is changed | No |
+| `ClaimFlagChangeEvent` | Fired when a claim flag is toggled | No |
+| `ClaimPermissionChangeEvent` | Fired when a claim permission is changed | No |
+| `ClaimChunkEvent` | Fired when a chunk is added to or removed from a claim | No |
+| `ClaimMergeEvent` | Fired when multiple claims are merged | No |
+
+### Listening to Events
+
+```java
+import fr.xyness.SimpleClaimSystem.Events.*;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+
+public class MyListener implements Listener {
+
+    @EventHandler
+    public void onClaimCreate(ClaimCreateEvent event) {
+        Claim claim = event.getClaim();
+        UUID creator = event.getPlayerId();
+        getLogger().info(claim.getOwnerName() + " created claim " + claim.getClaimName());
+    }
+
+    @EventHandler
+    public void onClaimEnter(ClaimEnterEvent event) {
+        Player player = event.getPlayer();
+        Claim claim = event.getClaim();
+
+        // Prevent entering if player is not allowed
+        if (someCustomCheck(player, claim)) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler
+    public void onMemberAction(ClaimMemberEvent event) {
+        switch (event.getAction()) {
+            case ADD -> getLogger().info("Member added to " + event.getClaim().getClaimName());
+            case KICK -> getLogger().info("Member kicked from " + event.getClaim().getClaimName());
+            case BAN -> getLogger().info("Player banned from " + event.getClaim().getClaimName());
+            case PROMOTE -> getLogger().info("Member promoted in " + event.getClaim().getClaimName());
+            case DEMOTE -> getLogger().info("Member demoted in " + event.getClaim().getClaimName());
+        }
+    }
+
+    @EventHandler
+    public void onClaimSale(ClaimSaleEvent event) {
+        switch (event.getAction()) {
+            case LISTED -> getLogger().info(event.getClaim().getClaimName() + " listed for $" + event.getPrice());
+            case BOUGHT -> getLogger().info(event.getPlayerId() + " bought " + event.getClaim().getClaimName());
+            case CANCELLED -> getLogger().info("Sale cancelled for " + event.getClaim().getClaimName());
+        }
+    }
+
+    @EventHandler
+    public void onClaimExpire(ClaimExpireEvent event) {
+        getLogger().info("Claim " + event.getClaim().getClaimName() + " expired (owner inactive)");
+    }
+
+    @EventHandler
+    public void onFlagChange(ClaimFlagChangeEvent event) {
+        getLogger().info("Flag " + event.getFlag() + " set to " + event.getValue()
+            + " in " + event.getClaim().getClaimName());
+    }
+}
+```
+
+### ClaimMemberEvent Actions
+
+| Action | Trigger |
+|--------|---------|
+| `ADD` | Member accepted an invitation |
+| `REMOVE` | Member removed via API |
+| `KICK` | Member kicked by owner/moderator or dashboard |
+| `BAN` | Player banned from claim |
+| `UNBAN` | Player unbanned from claim |
+| `PROMOTE` | Member promoted to Moderator |
+| `DEMOTE` | Moderator demoted to Member |
+
+### ClaimSaleEvent Actions
+
+| Action | Trigger |
+|--------|---------|
+| `LISTED` | Claim put up for sale |
+| `CANCELLED` | Sale cancelled |
+| `BOUGHT` | Claim purchased by another player |
+
+### ClaimChunkEvent Actions
+
+| Action | Trigger |
+|--------|---------|
+| `ADD` | Chunk added to a claim |
+| `REMOVE` | Chunk removed from a claim |
+
+### Base Class
+
+All events extend `ClaimEvent` which provides `getClaim()` to access the claim involved. Events are fired asynchronously (`async = true`).
+
 ## Types
 
 | Class | Description |
