@@ -127,13 +127,13 @@ Optional<Claim> opt = api.getClaim(chunk);
 opt.ifPresent(claim -> {
     UUID playerId = player.getUniqueId();
 
-    // Get role (returns VISITOR if not a member)
-    ClaimRole role = claim.getRole(playerId);
+    // Get role (returns "VISITOR" if not a member)
+    String role = claim.getRole(playerId);
 
     // Check membership
     boolean isMember = claim.isMember(playerId);
 
-    // Check specific permission
+    // Check specific permission (works with default and custom roles)
     boolean canInteract = claim.getPermission(role, "interact_chest");
 
     // Check if banned
@@ -141,6 +141,15 @@ opt.ifPresent(claim -> {
 
     // Get flags
     boolean explosions = claim.getFlag("creeper_explosions");
+
+    // Get all available roles (defaults + custom)
+    List<String> allRoles = claim.getAllRoles();
+
+    // Get custom roles only
+    List<String> customRoles = claim.getCustomRoles();
+
+    // Check if a role is a default role
+    boolean isDefault = ClaimRole.isDefault(role);
 });
 ```
 
@@ -156,8 +165,8 @@ boolean canBuild = api.hasPermission(chunk, playerId, "build");
 // Is this player banned from this chunk's claim?
 boolean banned = api.isBanned(chunk, playerId);
 
-// Get player's role in this chunk
-ClaimRole role = api.getRole(chunk, playerId);
+// Get player's role in this chunk (returns String)
+String role = api.getRole(chunk, playerId);
 
 // Check a flag
 Boolean pvp = api.getFlag(chunk, "pvp");
@@ -167,7 +176,7 @@ Boolean pvp = api.getFlag(chunk, "pvp");
 
 ```java
 // Add a faction member to all claims owned by the leader
-api.addMemberToAllClaims(leaderUuid, newMemberUuid, ClaimRole.MEMBER);
+api.addMemberToAllClaims(leaderUuid, newMemberUuid, "MEMBER");
 
 // Remove a member who left the faction from all claims
 api.removeMemberFromAllClaims(leaderUuid, leavingMemberUuid);
@@ -175,11 +184,14 @@ api.removeMemberFromAllClaims(leaderUuid, leavingMemberUuid);
 // Add a member to a specific claim
 Optional<Claim> opt = api.getClaimByOwnerAndName(ownerUuid, "My Base");
 opt.ifPresent(claim -> {
-    api.addMember(claim, memberUuid, ClaimRole.MEMBER);
+    api.addMember(claim, memberUuid, "MEMBER");
 });
 
-// Promote a member to moderator
-api.setMemberRole(claim, memberUuid, ClaimRole.MODERATOR);
+// Set a member's role (works with default and custom roles)
+api.setMemberRole(claim, memberUuid, "MODERATOR");
+
+// Set a custom role
+api.setMemberRole(claim, memberUuid, "BUILDER");
 ```
 
 ### Manage bans
@@ -196,7 +208,10 @@ api.unbanPlayer(claim, playerUuid);
 
 ```java
 // Allow members to build in a claim
-api.setPermission(claim, ClaimRole.MEMBER, "build", true);
+api.setPermission(claim, "MEMBER", "build", true);
+
+// Set permission for a custom role
+api.setPermission(claim, "BUILDER", "place_block", true);
 
 // Disable PvP in a claim
 api.setFlag(claim, "pvp", false);
@@ -228,7 +243,7 @@ List<String> names = api.getClaimNamesByOwner(ownerUuid);
 Optional<Claim> claim = api.getClaimByOwnerAndName(ownerUuid, "My Base");
 
 // Get members/banned of a claim
-Map<UUID, ClaimRole> members = api.getClaimMembers(ownerUuid, "My Base");
+Map<UUID, String> members = api.getClaimMembers(ownerUuid, "My Base");
 Map<UUID, LocalDateTime> banned = api.getClaimBanned(ownerUuid, "My Base");
 ```
 
@@ -261,14 +276,14 @@ String lang = api.getStringSetting("lang", "en_US");
 
 | Method | Description |
 |--------|-------------|
-| `addMember(Claim, UUID, ClaimRole)` | Add a member to a claim |
-| `addMemberToAllClaims(UUID, UUID, ClaimRole)` | Add a member to all claims of an owner |
+| `addMember(Claim, UUID, String)` | Add a member to a claim with a role name |
+| `addMemberToAllClaims(UUID, UUID, String)` | Add a member to all claims of an owner |
 | `removeMember(Claim, UUID)` | Remove a member from a claim |
 | `removeMemberFromAllClaims(UUID, UUID)` | Remove a member from all claims of an owner |
-| `setMemberRole(Claim, UUID, ClaimRole)` | Change a member's role |
+| `setMemberRole(Claim, UUID, String)` | Change a member's role |
 | `banPlayer(Claim, UUID, LocalDateTime)` | Ban a player from a claim |
 | `unbanPlayer(Claim, UUID)` | Unban a player from a claim |
-| `setPermission(Claim, ClaimRole, String, boolean)` | Set a permission for a role |
+| `setPermission(Claim, String, String, boolean)` | Set a permission for a role |
 | `setFlag(Claim, String, boolean)` | Set a flag value |
 
 ### Claim Checks
@@ -281,7 +296,7 @@ String lang = api.getStringSetting("lang", "en_US");
 | `hasPermission(Chunk, UUID, String)` | Check permission in claim |
 | `isBanned(Chunk, UUID)` | Check if player is banned |
 | `isMember(Chunk, UUID)` | Check if player is a member |
-| `getRole(Chunk, UUID)` | Get player's role in claim |
+| `getRole(Chunk, UUID)` | Get player's role name in claim |
 | `getFlag(Chunk, String)` | Get flag value in claim |
 
 ### Player Queries
@@ -320,6 +335,44 @@ String lang = api.getStringSetting("lang", "en_US");
 | `getIntSetting(String, int)` | Get integer setting |
 | `getDoubleSetting(String, double)` | Get double setting |
 
+## Roles
+
+SimpleClaimSystem supports **custom roles** in addition to the 4 default roles.
+
+### Default Roles
+
+| Role | Description |
+|------|-------------|
+| `VISITOR` | Non-member, minimal permissions |
+| `MEMBER` | Standard member |
+| `MODERATOR` | Advanced member with management permissions |
+| `OWNER` | Claim owner, full permissions (always returns `true`) |
+
+### Custom Roles
+
+Claim owners can create custom roles per claim with their own set of permissions. Custom roles are placed between VISITOR and MEMBER in the hierarchy.
+
+```java
+// Roles are now String-based (not enum)
+String role = claim.getRole(playerId);  // Returns "VISITOR", "MEMBER", "MODERATOR", "BUILDER", etc.
+
+// Check if a role is a default role
+boolean isDefault = ClaimRole.isDefault(role);  // true for VISITOR/MEMBER/MODERATOR/OWNER
+
+// Get all roles for a claim (defaults + custom)
+List<String> allRoles = claim.getAllRoles();  // ["VISITOR", "BUILDER", "GUARD", "MEMBER", "MODERATOR"]
+
+// Get only custom roles
+List<String> custom = claim.getCustomRoles();  // ["BUILDER", "GUARD"]
+
+// Permissions work the same way for default and custom roles
+boolean canBuild = claim.getPermission("BUILDER", "place_block");
+```
+
+### Migration Note
+
+Since v2.1.3, roles use `String` instead of `ClaimRole` enum throughout the API. Backward-compatible methods accepting `ClaimRole` are still available on the `Claim` class (`addMember`, `setPermission`, `getPermission`).
+
 ## Events
 
 SimpleClaimSystem fires custom Bukkit events for all claim actions. Listen to them in your plugin to react to claim changes.
@@ -334,7 +387,7 @@ SimpleClaimSystem fires custom Bukkit events for all claim actions. Listen to th
 | `ClaimEnterEvent` | Fired when a player enters a claim | Yes |
 | `ClaimLeaveEvent` | Fired when a player leaves a claim | No |
 | `ClaimTeleportEvent` | Fired when a player teleports to a claim spawn | Yes |
-| `ClaimMemberEvent` | Fired when a member is added, removed, kicked, banned, unbanned, promoted, or demoted | No |
+| `ClaimMemberEvent` | Fired when a member is added, removed, kicked, banned, unbanned, promoted, demoted, or role changed | No |
 | `ClaimOwnerTransferEvent` | Fired when claim ownership is transferred | No |
 | `ClaimSaleEvent` | Fired when a claim is listed for sale, sale cancelled, or bought | No |
 | `ClaimRenameEvent` | Fired when a claim is renamed | No |
@@ -374,13 +427,25 @@ public class MyListener implements Listener {
 
     @EventHandler
     public void onMemberAction(ClaimMemberEvent event) {
+        // Use getRoleName() to get the String role (works for custom roles too)
+        String role = event.getRoleName();
+
         switch (event.getAction()) {
-            case ADD -> getLogger().info("Member added to " + event.getClaim().getClaimName());
+            case ADD -> getLogger().info("Member added as " + role);
             case KICK -> getLogger().info("Member kicked from " + event.getClaim().getClaimName());
             case BAN -> getLogger().info("Player banned from " + event.getClaim().getClaimName());
-            case PROMOTE -> getLogger().info("Member promoted in " + event.getClaim().getClaimName());
-            case DEMOTE -> getLogger().info("Member demoted in " + event.getClaim().getClaimName());
+            case PROMOTE -> getLogger().info("Member promoted to " + role);
+            case DEMOTE -> getLogger().info("Member demoted to " + role);
+            case ROLE_CHANGE -> getLogger().info("Member role changed to " + role);
         }
+    }
+
+    @EventHandler
+    public void onPermissionChange(ClaimPermissionChangeEvent event) {
+        // getRoleName() returns the String role (can be a custom role)
+        String role = event.getRoleName();
+        getLogger().info("Permission " + event.getPermission() + " set to " + event.getValue()
+            + " for role " + role + " in " + event.getClaim().getClaimName());
     }
 
     @EventHandler
@@ -390,17 +455,6 @@ public class MyListener implements Listener {
             case BOUGHT -> getLogger().info(event.getPlayerId() + " bought " + event.getClaim().getClaimName());
             case CANCELLED -> getLogger().info("Sale cancelled for " + event.getClaim().getClaimName());
         }
-    }
-
-    @EventHandler
-    public void onClaimExpire(ClaimExpireEvent event) {
-        getLogger().info("Claim " + event.getClaim().getClaimName() + " expired (owner inactive)");
-    }
-
-    @EventHandler
-    public void onFlagChange(ClaimFlagChangeEvent event) {
-        getLogger().info("Flag " + event.getFlag() + " set to " + event.getValue()
-            + " in " + event.getClaim().getClaimName());
     }
 }
 ```
@@ -414,8 +468,9 @@ public class MyListener implements Listener {
 | `KICK` | Member kicked by owner/moderator or dashboard |
 | `BAN` | Player banned from claim |
 | `UNBAN` | Player unbanned from claim |
-| `PROMOTE` | Member promoted to Moderator |
-| `DEMOTE` | Moderator demoted to Member |
+| `PROMOTE` | Member promoted |
+| `DEMOTE` | Member demoted |
+| `ROLE_CHANGE` | Member role changed via `/claim role set` |
 
 ### ClaimSaleEvent Actions
 
@@ -440,10 +495,10 @@ All events extend `ClaimEvent` which provides `getClaim()` to access the claim i
 
 | Class | Description |
 |-------|-------------|
-| `Claim` | Represents a land claim with chunks, members, permissions, flags |
+| `Claim` | Represents a land claim with chunks, members, permissions, flags, and custom roles |
 | `PlayerData` | Player profile with UUID, name, texture, settings |
 | `ChunkKey` | Immutable chunk identifier (worldId, x, z) |
-| `ClaimRole` | Enum: `VISITOR`, `MEMBER`, `MODERATOR`, `OWNER` |
+| `ClaimRole` | Enum: `VISITOR`, `MEMBER`, `MODERATOR`, `OWNER` — default roles. Use `ClaimRole.isDefault(String)` to check |
 | `WorldMode` | Enum: `SURVIVAL`, `SURVIVAL_REQUIRING_CLAIMS`, `PROTECTED`, `DISABLED` |
 
 ## Requirements
@@ -455,7 +510,7 @@ All events extend `ClaimEvent` which provides `getClaim()` to access the claim i
 ## Links
 
 - [BuiltByBit](https://builtbybit.com/resources/simpleclaimsystem.92437/)
-- [Javadoc](https://javadoc.jitpack.io/com/github/Xyness/SimpleClaimSystem-API/v2.1.2/javadoc/)
+- [Javadoc](https://javadoc.jitpack.io/com/github/Xyness/SimpleClaimSystem-API/v2.1.3/javadoc/)
 
 ## License
 
