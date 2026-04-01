@@ -20,7 +20,7 @@ This module allows developers to integrate with SimpleClaimSystem from their own
     <dependency>
         <groupId>com.github.Xyness</groupId>
         <artifactId>SimpleClaimSystem-API</artifactId>
-        <version>v2.1.3</version>
+        <version>v2.1.4</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
@@ -34,7 +34,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.Xyness:SimpleClaimSystem-API:v2.1.3'
+    compileOnly 'com.github.Xyness:SimpleClaimSystem-API:v2.1.4'
 }
 ```
 
@@ -46,7 +46,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.Xyness:SimpleClaimSystem-API:v2.1.3")
+    compileOnly("com.github.Xyness:SimpleClaimSystem-API:v2.1.4")
 }
 ```
 
@@ -371,7 +371,7 @@ boolean canBuild = claim.getPermission("BUILDER", "place_block");
 
 ### Migration Note
 
-Since v2.1.3, roles use `String` instead of `ClaimRole` enum throughout the API. Backward-compatible methods accepting `ClaimRole` are still available on the `Claim` class (`addMember`, `setPermission`, `getPermission`).
+Since v2.1.4, roles use `String` instead of `ClaimRole` enum throughout the API. Backward-compatible methods accepting `ClaimRole` are still available on the `Claim` class (`addMember`, `setPermission`, `getPermission`).
 
 ## Events
 
@@ -510,7 +510,7 @@ All events extend `ClaimEvent` which provides `getClaim()` to access the claim i
 ## Links
 
 - [BuiltByBit](https://builtbybit.com/resources/simpleclaimsystem.92437/)
-- [Javadoc](https://javadoc.jitpack.io/com/github/Xyness/SimpleClaimSystem-API/v2.1.3/javadoc/)
+- [Javadoc](https://javadoc.jitpack.io/com/github/Xyness/SimpleClaimSystem-API/v2.1.4/javadoc/)
 
 ## License
 

@@ -1,14 +1,14 @@
 # Version
-version: 2.1.3
+version: 2.1.4
 
 # Update date
 date: 01/04/2026
 
 # Update notes
 update-notes:
-- Change Claim members/permissions maps from ClaimRole enum to String-based keys
+- Custom roles support with String-based role system
 - Add customRoles list, getAllRoles(), getNextRole() to Claim
 - Add ClaimRole.isDefault() utility method
-- Update ClaimMemberEvent/ClaimPermissionChangeEvent to use String role with backward compat
-- Update SCS_API signatures to use String roles
+- Add ROLE_CHANGE action to ClaimMemberEvent
+- Update all API signatures to use String roles
 - Keep backward-compatible methods accepting ClaimRole enum
