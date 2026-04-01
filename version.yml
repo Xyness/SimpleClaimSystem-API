@@ -1,14 +1,14 @@
 # Version
-version: 2.1.2
+version: 2.1.3
 
 # Update date
-date: 31/03/2026
+date: 01/04/2026
 
 # Update notes
 update-notes:
-- Added 16 custom Bukkit events for all claim actions
-- ClaimEnterEvent and ClaimTeleportEvent are cancellable
-- ClaimMemberEvent covers ADD, REMOVE, KICK, BAN, UNBAN, PROMOTE, DEMOTE
-- ClaimSaleEvent covers LISTED, CANCELLED, BOUGHT
-- ClaimChunkEvent covers ADD, REMOVE
-- Updated README with full events documentation and examples
+- Change Claim members/permissions maps from ClaimRole enum to String-based keys
+- Add customRoles list, getAllRoles(), getNextRole() to Claim
+- Add ClaimRole.isDefault() utility method
+- Update ClaimMemberEvent/ClaimPermissionChangeEvent to use String role with backward compat
+- Update SCS_API signatures to use String roles
+- Keep backward-compatible methods accepting ClaimRole enum
