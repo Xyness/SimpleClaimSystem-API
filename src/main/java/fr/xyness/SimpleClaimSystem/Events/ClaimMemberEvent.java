@@ -28,10 +28,6 @@ public class ClaimMemberEvent extends ClaimEvent {
         this.roleName = roleName;
     }
 
-    /** Backward-compatible constructor accepting ClaimRole enum. */
-    public ClaimMemberEvent(Claim claim, UUID memberId, Action action, ClaimRole role) {
-        this(claim, memberId, action, role != null ? role.name() : null);
-    }
 
     /** Gets the UUID of the member affected. */
     public UUID getMemberId() { return memberId; }
