@@ -42,20 +42,23 @@ public class Claim {
     // Spawn location of the claim.
     private Location spawnLocation;
 
-    // Members map (UUID -> role).
-    private Map<UUID, ClaimRole> members = new HashMap<>();
+    // Members map (UUID -> role name).
+    private Map<UUID, String> members = new HashMap<>();
 
     // Banned players map (UUID -> Unban LocalDateTime).
     private Map<UUID, LocalDateTime> banned = new HashMap<>();
 
-    // Settings map (ClaimRole -> (Setting,Value)).
-    private Map<ClaimRole,Map<String, Boolean>> permissions = new HashMap<>();
+    // Permissions map (role name -> (permission, value)).
+    private Map<String, Map<String, Boolean>> permissions = new HashMap<>();
 
     // Flags map (Flags -> Value).
     private Map<String, Boolean> flags = new HashMap<>();
 
     // Other things (Thing -> Value).
     private Map<String, Object> other_things = new HashMap<>();
+
+    // Custom roles for this claim (ordered list of role names).
+    private List<String> customRoles = new ArrayList<>();
 
 
     // ******************
@@ -81,7 +84,7 @@ public class Claim {
      * @param other_things The other things of the claim.
      */
     public Claim(int id, UUID ownerUuid, String ownerName, String claimName, String description, Set<ChunkKey> chunks, String worldUuid,
-                 Location spawnLocation, Map<UUID, ClaimRole> members, Map<UUID, LocalDateTime> banned, Map<ClaimRole,Map<String, Boolean>> permissions,
+                 Location spawnLocation, Map<UUID, String> members, Map<UUID, LocalDateTime> banned, Map<String, Map<String, Boolean>> permissions,
                  Map<String, Boolean> flags, Map<String, Object> other_things) {
         this.id = id;
         this.ownerUuid = ownerUuid;
@@ -197,16 +200,33 @@ public class Claim {
     public Location getSpawnLocation() { return spawnLocation; }
     public void setSpawnLocation(Location spawnLocation) { this.spawnLocation = spawnLocation; }
 
-    public Map<UUID, ClaimRole> getMembers() { return members; }
-    public void setMembers(Map<UUID, ClaimRole> members) { this.members = members; }
-    public void addMember(UUID uuid, ClaimRole role) { members.put(uuid, role); }
+    // --- Members (String-based roles) ---
+
+    public Map<UUID, String> getMembers() { return members; }
+    public void setMembers(Map<UUID, String> members) { this.members = members; }
+    public void addMember(UUID uuid, String role) { members.put(uuid, role); }
     public void removeMember(UUID uuid) { members.remove(uuid); }
 
-    public ClaimRole getRole(UUID uuid) {
-        return members.getOrDefault(uuid, ClaimRole.VISITOR);
+    /** Backward-compatible method accepting ClaimRole enum. */
+    public void addMember(UUID uuid, ClaimRole role) { members.put(uuid, role.name()); }
+
+    public String getRole(UUID uuid) {
+        return members.getOrDefault(uuid, ClaimRole.VISITOR.name());
+    }
+
+    /** Gets the role as ClaimRole enum, or VISITOR if it's a custom role. */
+    public ClaimRole getRoleEnum(UUID uuid) {
+        String role = getRole(uuid);
+        try {
+            return ClaimRole.valueOf(role);
+        } catch (IllegalArgumentException e) {
+            return ClaimRole.VISITOR;
+        }
     }
 
     public boolean isMember(UUID uuid) { return members.containsKey(uuid); }
+
+    // --- Banned ---
 
     public Map<UUID, LocalDateTime> getBanned() { return banned; }
     public LocalDateTime getBanTime(UUID banUuid) { return banned.get(banUuid); }
@@ -219,26 +239,90 @@ public class Claim {
         return date != null && LocalDateTime.now().isBefore(date);
     }
 
-    public Map<ClaimRole,Map<String, Boolean>> getPermissions() { return permissions; }
-    public void setPermissions(Map<ClaimRole,Map<String, Boolean>> permissions) { this.permissions = permissions; }
+    // --- Permissions (String-based roles) ---
 
+    public Map<String, Map<String, Boolean>> getPermissions() { return permissions; }
+    public void setPermissions(Map<String, Map<String, Boolean>> permissions) { this.permissions = permissions; }
+
+    public void setPermission(String role, String key, Boolean value) {
+        Map<String, Boolean> rolePerms = permissions.get(role);
+        if (rolePerms != null) rolePerms.put(key, value);
+    }
+
+    public Boolean getPermission(String role, String key) {
+    	if (ClaimRole.OWNER.name().equals(role)) return true;
+        Map<String, Boolean> rolePerms = permissions.get(role);
+        if (rolePerms == null) return false;
+        return rolePerms.getOrDefault(key, false);
+    }
+
+    /** Backward-compatible method accepting ClaimRole enum. */
     public void setPermission(ClaimRole role, String key, Boolean value) {
-        permissions.get(role).put(key, value);
+        setPermission(role.name(), key, value);
     }
 
+    /** Backward-compatible method accepting ClaimRole enum. */
     public Boolean getPermission(ClaimRole role, String key) {
-    	if(role == ClaimRole.OWNER) return true;
-        return permissions.get(role).getOrDefault(key,false);
+        return getPermission(role.name(), key);
     }
+
+    // --- Flags ---
 
     public Map<String,Boolean> getFlags() { return flags; }
     public void setFlags(Map<String,Boolean> flags) { this.flags = flags; }
     public void setFlag(String key, Boolean value) { flags.put(key, value); }
     public Boolean getFlag(String key) { return flags.get(key); }
 
+    // --- Other things ---
+
     public Map<String,Object> getOtherThings() { return other_things; }
     public void setOtherThings(Map<String,Object> other_things) { this.other_things = other_things; }
     public Object getOtherThing(String key) { return other_things.get(key); }
     public void setOtherThing(String key, Object value) { other_things.put(key, value); }
+
+    // --- Custom Roles ---
+
+    public List<String> getCustomRoles() { return customRoles; }
+    public void setCustomRoles(List<String> customRoles) { this.customRoles = customRoles; }
+
+    public void addCustomRole(String roleName) {
+        if (!customRoles.contains(roleName)) customRoles.add(roleName);
+    }
+
+    public void removeCustomRole(String roleName) {
+        customRoles.remove(roleName);
+    }
+
+    public boolean hasCustomRole(String roleName) {
+        return customRoles.contains(roleName);
+    }
+
+    /**
+     * Gets all role names for this claim (defaults + custom), excluding OWNER.
+     * Ordered: VISITOR, custom roles..., MEMBER, MODERATOR.
+     *
+     * @return An ordered list of role names.
+     */
+    public List<String> getAllRoles() {
+        List<String> roles = new ArrayList<>();
+        roles.add(ClaimRole.VISITOR.name());
+        roles.addAll(customRoles);
+        roles.add(ClaimRole.MEMBER.name());
+        roles.add(ClaimRole.MODERATOR.name());
+        return roles;
+    }
+
+    /**
+     * Gets the next role in the cycling order (for GUI).
+     *
+     * @param currentRole The current role name.
+     * @return The next role name.
+     */
+    public String getNextRole(String currentRole) {
+        List<String> roles = getAllRoles();
+        int idx = roles.indexOf(currentRole);
+        if (idx == -1) return ClaimRole.VISITOR.name();
+        return roles.get((idx + 1) % roles.size());
+    }
 
 }
