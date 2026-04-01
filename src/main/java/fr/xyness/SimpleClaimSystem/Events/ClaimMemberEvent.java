@@ -15,17 +15,22 @@ public class ClaimMemberEvent extends ClaimEvent {
     private static final HandlerList HANDLERS = new HandlerList();
 
     /** The type of member action. */
-    public enum Action { ADD, REMOVE, PROMOTE, DEMOTE, KICK, BAN, UNBAN }
+    public enum Action { ADD, REMOVE, PROMOTE, DEMOTE, KICK, BAN, UNBAN, ROLE_CHANGE }
 
     private final UUID memberId;
     private final Action action;
-    private final ClaimRole role;
+    private final String roleName;
 
-    public ClaimMemberEvent(Claim claim, UUID memberId, Action action, ClaimRole role) {
+    public ClaimMemberEvent(Claim claim, UUID memberId, Action action, String roleName) {
         super(claim);
         this.memberId = memberId;
         this.action = action;
-        this.role = role;
+        this.roleName = roleName;
+    }
+
+    /** Backward-compatible constructor accepting ClaimRole enum. */
+    public ClaimMemberEvent(Claim claim, UUID memberId, Action action, ClaimRole role) {
+        this(claim, memberId, action, role != null ? role.name() : null);
     }
 
     /** Gets the UUID of the member affected. */
@@ -34,8 +39,18 @@ public class ClaimMemberEvent extends ClaimEvent {
     /** Gets the action performed. */
     public Action getAction() { return action; }
 
-    /** Gets the role of the member (may be null for REMOVE/KICK/BAN/UNBAN). */
-    public ClaimRole getRole() { return role; }
+    /** Gets the role name of the member (may be null for REMOVE/KICK/BAN/UNBAN). */
+    public String getRoleName() { return roleName; }
+
+    /** Gets the role as ClaimRole enum, or null if custom/null. */
+    public ClaimRole getRole() {
+        if (roleName == null) return null;
+        try {
+            return ClaimRole.valueOf(roleName);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
 
     @Override public HandlerList getHandlers() { return HANDLERS; }
     public static HandlerList getHandlerList() { return HANDLERS; }

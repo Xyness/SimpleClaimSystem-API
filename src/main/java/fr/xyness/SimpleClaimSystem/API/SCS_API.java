@@ -13,7 +13,6 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
-import fr.xyness.SimpleClaimSystem.Enums.ClaimRole;
 import fr.xyness.SimpleClaimSystem.Enums.WorldMode;
 import fr.xyness.SimpleClaimSystem.Types.ChunkKey;
 import fr.xyness.SimpleClaimSystem.Types.Claim;
@@ -111,9 +110,9 @@ public interface SCS_API {
      *
      * @param ownerUuid The owner's UUID.
      * @param claimName The claim name.
-     * @return A map of member UUID to ClaimRole.
+     * @return A map of member UUID to role name.
      */
-    Map<UUID, ClaimRole> getClaimMembers(UUID ownerUuid, String claimName);
+    Map<UUID, String> getClaimMembers(UUID ownerUuid, String claimName);
 
     /**
      * Gets the banned players of a claim by owner and claim name (synchronous).
@@ -139,7 +138,7 @@ public interface SCS_API {
      * @param role The role to assign (MEMBER, MODERATOR).
      * @return A CompletableFuture that completes when the operation is done.
      */
-    CompletableFuture<Void> addMember(Claim claim, UUID memberUuid, ClaimRole role);
+    CompletableFuture<Void> addMember(Claim claim, UUID memberUuid, String role);
 
     /**
      * Adds a member to all claims owned by a player (asynchronous).
@@ -149,7 +148,7 @@ public interface SCS_API {
      * @param role The role to assign.
      * @return A CompletableFuture that completes when the operation is done.
      */
-    CompletableFuture<Void> addMemberToAllClaims(UUID ownerUuid, UUID memberUuid, ClaimRole role);
+    CompletableFuture<Void> addMemberToAllClaims(UUID ownerUuid, UUID memberUuid, String role);
 
     /**
      * Removes a member from a claim (asynchronous).
@@ -178,7 +177,7 @@ public interface SCS_API {
      * @param newRole The new role.
      * @return A CompletableFuture that completes when the operation is done.
      */
-    CompletableFuture<Void> setMemberRole(Claim claim, UUID memberUuid, ClaimRole newRole);
+    CompletableFuture<Void> setMemberRole(Claim claim, UUID memberUuid, String newRole);
 
     /**
      * Bans a player from a claim (asynchronous).
@@ -208,7 +207,7 @@ public interface SCS_API {
      * @param value The permission value.
      * @return A CompletableFuture that completes when the operation is done.
      */
-    CompletableFuture<Void> setPermission(Claim claim, ClaimRole role, String permission, boolean value);
+    CompletableFuture<Void> setPermission(Claim claim, String role, String permission, boolean value);
 
     /**
      * Sets a flag value for a claim (asynchronous).
@@ -285,7 +284,7 @@ public interface SCS_API {
      * @param playerId The player's UUID.
      * @return The player's role, or VISITOR if not a member or unclaimed.
      */
-    ClaimRole getRole(Chunk chunk, UUID playerId);
+    String getRole(Chunk chunk, UUID playerId);
 
     /**
      * Gets a flag value for the claim at the given chunk.
