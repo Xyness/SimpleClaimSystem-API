@@ -6,9 +6,5 @@ date: 01/04/2026
 
 # Update notes
 update-notes:
-- Custom roles support with String-based role system
-- Add customRoles list, getAllRoles(), getNextRole() to Claim
-- Add ClaimRole.isDefault() utility method
-- Add ROLE_CHANGE action to ClaimMemberEvent
-- Update all API signatures to use String roles
-- Keep backward-compatible methods accepting ClaimRole enum
+- Add /scs player <player> add-max-roles <amount>
+- Add /scs player <player> set-max-roles <amount>
