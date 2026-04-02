@@ -20,7 +20,7 @@ This module allows developers to integrate with SimpleClaimSystem from their own
     <dependency>
         <groupId>com.github.Xyness</groupId>
         <artifactId>SimpleClaimSystem-API</artifactId>
-        <version>v2.1.4</version>
+        <version>v2.1.8</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
@@ -34,7 +34,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.Xyness:SimpleClaimSystem-API:v2.1.4'
+    compileOnly 'com.github.Xyness:SimpleClaimSystem-API:v2.1.8'
 }
 ```
 
@@ -46,7 +46,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.Xyness:SimpleClaimSystem-API:v2.1.4")
+    compileOnly("com.github.Xyness:SimpleClaimSystem-API:v2.1.8")
 }
 ```
 
@@ -489,7 +489,7 @@ public class MyListener implements Listener {
 
 ### Base Class
 
-All events extend `ClaimEvent` which provides `getClaim()` to access the claim involved. Events are fired asynchronously (`async = true`).
+All events extend `ClaimEvent` which provides `getClaim()` to access the claim involved.
 
 ## Types
 
@@ -510,7 +510,7 @@ All events extend `ClaimEvent` which provides `getClaim()` to access the claim i
 ## Links
 
 - [BuiltByBit](https://builtbybit.com/resources/simpleclaimsystem.92437/)
-- [Javadoc](https://javadoc.jitpack.io/com/github/Xyness/SimpleClaimSystem-API/v2.1.4/javadoc/)
+- [Javadoc](https://javadoc.jitpack.io/com/github/Xyness/SimpleClaimSystem-API/v2.1.8/javadoc/)
 
 ## License
 

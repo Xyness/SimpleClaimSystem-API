@@ -276,21 +276,44 @@ public class Claim {
     // --- Other things ---
 
     public Map<String,Object> getOtherThings() { return other_things; }
-    public void setOtherThings(Map<String,Object> other_things) { this.other_things = other_things; }
+    public void setOtherThings(Map<String,Object> other_things) {
+        this.other_things = other_things;
+        syncCustomRolesFromOtherThings();
+    }
     public Object getOtherThing(String key) { return other_things.get(key); }
     public void setOtherThing(String key, Object value) { other_things.put(key, value); }
 
     // --- Custom Roles ---
 
     public List<String> getCustomRoles() { return customRoles; }
-    public void setCustomRoles(List<String> customRoles) { this.customRoles = customRoles; }
+    public void setCustomRoles(List<String> customRoles) {
+        this.customRoles = customRoles;
+        other_things.put("customRoles", customRoles);
+    }
 
     public void addCustomRole(String roleName) {
         if (!customRoles.contains(roleName)) customRoles.add(roleName);
+        other_things.put("customRoles", customRoles);
     }
 
     public void removeCustomRole(String roleName) {
         customRoles.remove(roleName);
+        other_things.put("customRoles", customRoles);
+    }
+
+    /**
+     * Restores customRoles from other_things map.
+     * Called automatically by setOtherThings().
+     */
+    @SuppressWarnings("unchecked")
+    private void syncCustomRolesFromOtherThings() {
+        Object raw = other_things.get("customRoles");
+        if (raw instanceof List<?> list) {
+            customRoles = new ArrayList<>();
+            for (Object o : list) {
+                customRoles.add(String.valueOf(o));
+            }
+        }
     }
 
     public boolean hasCustomRole(String roleName) {

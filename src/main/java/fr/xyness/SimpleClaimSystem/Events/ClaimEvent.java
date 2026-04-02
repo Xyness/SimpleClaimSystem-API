@@ -30,7 +30,7 @@ public abstract class ClaimEvent extends Event {
      * @param claim The claim involved.
      */
     public ClaimEvent(Claim claim) {
-        super(true);
+        super(false);
         this.claim = claim;
     }
 
