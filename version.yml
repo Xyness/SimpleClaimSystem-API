@@ -1,10 +1,9 @@
 # Version
-version: 2.1.4
+version: 2.1.8
 
 # Update date
-date: 01/04/2026
+date: 02/04/2026
 
 # Update notes
 update-notes:
-- Add /scs player <player> add-max-roles <amount>
-- Add /scs player <player> set-max-roles <amount>
+- Fix ClaimEnterEvent/ClaimLeaveEvent async error on Paper
