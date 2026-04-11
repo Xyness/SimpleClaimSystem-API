@@ -1,43 +1,9 @@
 # Version
-version: 2.1.13
+version: 2.1.14
 
 # Update date
-date: 11/04/2026
+date: 12/04/2026
 
 # Update notes
 update-notes:
-- "Added /scs player <player> <claim|*> <action>, admin management of any claim (scs.admin.player)"
-- "Actions cover setowner, addmember, kick, ban, unban, promote, demote, setspawn, setname, sell and cancel-sale"
-- "addmember works on an offline player already known to the database, and ban takes a duration"
-- "Added tab completion for all of it, including the claim names of offline players"
-- "Removed the admin bypass from /claim on player claims, it stays for protected areas"
-- "Added players.default.max-claim-price, a cap on the price of a claim (0 = no limit)"
-- "Added scs.limit.max-claim-price.<value> and the matching /scs player settings"
-- "Added %max-claim-price% to the profile menu, shown as infinity when 0"
-- "Added the placeholders %scs_max-claim-price%, %scs_max-radius%, %scs_max-roles% and %scs_auto-purge-bypass%"
-- "Added claim placeholders for the description, sale state, price, members, spawn and chunk count"
-- "Added dynamic chunk placeholders and %scs_claim_setting_<permission>_<role>%"
-- "Role placeholders show the custom role name instead of falling back to Visitor"
-- "Added a 200ms placeholder cache per player for scoreboards and TAB plugins"
-- "Fixed a Geyser LinkageError in every Bedrock menu"
-- "Fixed the Floodgate index higher than components error in the flags and permissions menus"
-- "Fixed a NullPointerException when a Java player used the admin features on another claim"
-- "Fixed a Folia watchdog timeout on quit, claim loading is really asynchronous now"
-- "Fixed %scs_delay% returning the distance instead of the delay"
-- "Fixed importFromV1 losing the remaining chunks of a claim on any error"
-- "importFromV1 logs the claim that failed and skips claims left with no chunk"
-- "Fixed the claim cache executor blocking the main thread when its queue was full"
-- "AutoPurge reads players by pages of 500 instead of the whole table"
-- "Fixed AutoPurge calling Bukkit.getPlayer() off the main thread"
-- "Fixed a malformed date stopping the whole purge cycle"
-- "Fixed an ArrayIndexOutOfBoundsException on corrupted member data in the menus"
-- "Claim data is stored in concurrent collections and its mutable fields are volatile"
-- "Fixed getChunkAtAsync returning null instead of a failed future on Folia"
-- "Fixed teleportAsync completing before the teleport actually ran"
-- "Fixed stale player and world mode data after a reload"
-- "Bedrock forms go through one shared helper instead of the same code in 13 files"
-- "Dashboard tokens survive a restart (web-tokens.json)"
-- "SchedulerAdapter no longer builds a dynamic proxy on every call"
-- "The permission and flag menus are one dynamic menu, extra pages go in menu_permissions_N.yml"
-- "Added /scs docs pages for the admin claim commands and max-claim-price"
-- "Split CommandHandlers.java into four files, external callers are unaffected"
+- Fix executor issue
