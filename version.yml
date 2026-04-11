@@ -25,7 +25,8 @@ update-notes:
 - Fixed SchedulerAdapter.teleportAsync() completing the future before the teleport actually executes in non-Folia mode; future now completes inside the scheduled task callback
 - Fixed PlayerListener.lastChunk and tasks maps not being cleared on plugin reload/stop, causing stale data after reload
 - Fixed FlagsListener world modes not being cleared on reload, causing stale world mode configuration after config changes
-- Added /scs player <player> <claim / *> <action> [args] admin claim management commands with permission scs.admin.player, supporting now setowner, invite, kick, ban, unban, promote, demote, setspawn, setname, sell, cancel-sale
+- Added /scs player <player> <claim / *> <action> [args] admin claim management commands with permission scs.admin.player, supporting setowner, addmember, kick, ban, unban, promote, demote, setspawn, setname, sell, cancel-sale
+- Added /scs player <player> <claim / *> addmember <player> to force-add a member to a claim without invitation (target can be offline but must be registered in the database)
 - Added /scs player <player> <claim / *> ban <target> <time> for time-limited bans via admin command
 - Added tab completion for all new /scs player admin claim commands with context-aware suggestions (settings vs claim names vs actions vs player names)
 - Added non-blocking tab completion for offline player claim names using getTempPlayerIfCached()
@@ -58,7 +59,10 @@ update-notes:
 - Added main.sendBedrockForm() utility method, replacing the duplicated floodgate/geyser fallback pattern across all 13 Bedrock GUI files
 - Added WebDashboard token persistence via web-tokens.json file, tokens now survive server restarts
 - Added case 3 in /scs command showing help message for incomplete commands
+- Replaced MenuPermissions1Gui, MenuPermissions2Gui, MenuPermissions3Gui with a single dynamic MenuPermissionsGui that accepts a page parameter and detects available pages from the GUI registry
+- Replaced MenuFlags1Gui, MenuFlags2Gui with a single dynamic MenuFlagsGui that accepts a page parameter and detects available pages from the GUI registry
+- Users can now create additional permission/flag pages by adding new menu_permissions_N.yml or menu_flags_N.yml files in the guis folder without code changes
+- Added /scs docs pages for admin claim management commands and max-claim-price setting
 - Replaced Proxy.newProxyInstance with direct lambdas in all SchedulerAdapter methods for better performance (eliminates dynamic proxy class generation on every scheduler call)
 - Pre-computed FlagsListener world modes with cache, added clearWorldModes() called on reload
 - Split CommandHandlers.java (12263 lines) into 4 files CommandHandlers (dispatchers/tab completion/delegates), AdminCommandHandler, MemberCommandHandler, ClaimCommandHandler; all external callers remain compatible via delegate methods
-
