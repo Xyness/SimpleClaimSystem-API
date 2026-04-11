@@ -7,7 +7,8 @@ date: 11/04/2026
 # Update notes
 update-notes:
 - "Added /scs player <player> <claim|*> <action>, admin management of any claim (scs.admin.player)"
-- "Actions cover setowner, invite, kick, ban, unban, promote, demote, setspawn, setname, sell and cancel-sale"
+- "Actions cover setowner, addmember, kick, ban, unban, promote, demote, setspawn, setname, sell and cancel-sale"
+- "addmember works on an offline player already known to the database, and ban takes a duration"
 - "Added tab completion for all of it, including the claim names of offline players"
 - "Removed the admin bypass from /claim on player claims, it stays for protected areas"
 - "Added players.default.max-claim-price, a cap on the price of a claim (0 = no limit)"
@@ -37,3 +38,6 @@ update-notes:
 - "Bedrock forms go through one shared helper instead of the same code in 13 files"
 - "Dashboard tokens survive a restart (web-tokens.json)"
 - "SchedulerAdapter no longer builds a dynamic proxy on every call"
+- "The permission and flag menus are one dynamic menu, extra pages go in menu_permissions_N.yml"
+- "Added /scs docs pages for the admin claim commands and max-claim-price"
+- "Split CommandHandlers.java into four files, external callers are unaffected"
