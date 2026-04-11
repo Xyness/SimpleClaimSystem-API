@@ -1,68 +1,9 @@
 # Version
-version: 2.1.13
+version: 2.1.14
 
 # Update date
-date: 11/04/2026
+date: 12/04/2026
 
 # Update notes
 update-notes:
-- Fixed Geyser LinkageError in all Bedrock GUI files by adding null checks for geyserHook() and getGeyserAPI() before the Geyser fallback, adding a null check on the connection object, and broadening the catch clause to LinkageError | Exception
-- Fixed Floodgate "index higher than components" error in MenuFlagsBedrock and MenuPermissionsBedrock by capturing a snapshot of the map data before setting the response handler, preventing shared mutable state from being overwritten by another GUI between form creation and response
-- Fixed NullPointerException when a Java player uses /claim admin features (e.g. /claim permissions) on another player's claim, caused by handleOpenMenuByClaim checking if the claim owner was a Bedrock player instead of the executing player
-- Fixed Folia watchdog timeout (5.5s+ tick freeze) on player quit by making ClaimCache.loadClaim() and ClaimCache.loadClaimsBulk() truly asynchronous using CompletableFuture.supplyAsync() instead of blocking CompletableFuture.completedFuture() with synchronous DB calls
-- Fixed PlaceholderAPI %scs_delay% placeholder returning the distance value instead of the delay value (copy-paste bug calling getDistance() instead of getDelay())
-- Fixed importFromV1 chunk deserialization catching only EOFException in the inner loop, causing all remaining chunks to be lost if any other exception occurred; now catches Exception and breaks gracefully
-- Fixed importFromV1 not checking for null/empty chunksData before Base64 decoding
-- Fixed importFromV1 not logging which claim had deserialization errors
-- Fixed importFromV1 not skipping claims with zero chunks after deserialization (now logs and skips)
-- Fixed ClaimCache executor using CallerRunsPolicy which could block the main thread when the queue was full; replaced with AbortPolicy
-- Fixed AutoPurge loading all players with SELECT * without pagination, risking OOM with large player databases; now uses LIMIT/OFFSET pagination (500 per page)
-- Fixed AutoPurge using Bukkit.getPlayer() on async thread (not thread-safe); replaced with a snapshot of online player UUIDs taken before the async loop
-- Fixed AutoPurge DateTimeParseException on malformed last_connection date stopping the entire purge cycle; now catches and logs the error, continues purging remaining players
-- Fixed GuiListener ArrayIndexOutOfBoundsException on corrupted mapObjects data when splitting member data by "@" without bounds validation
-- Fixed Claim type thread safety, replaced HashMap with ConcurrentHashMap for members, banned, permissions, flags, other_things; replaced HashSet with ConcurrentHashMap.newKeySet for chunks; added volatile to mutable fields (ownerUuid, ownerName, claimName, description, spawnLocation, customRoles); setters wrap incoming maps into ConcurrentHashMap
-- Fixed SchedulerAdapter.getChunkAtAsync() returning null instead of CompletableFuture.failedFuture() on Folia error, causing NPE in callers
-- Fixed SchedulerAdapter.teleportAsync() completing the future before the teleport actually executes in non-Folia mode; future now completes inside the scheduled task callback
-- Fixed PlayerListener.lastChunk and tasks maps not being cleared on plugin reload/stop, causing stale data after reload
-- Fixed FlagsListener world modes not being cleared on reload, causing stale world mode configuration after config changes
-- Added /scs player <player> <claim / *> <action> [args] admin claim management commands with permission scs.admin.player, supporting setowner, addmember, kick, ban, unban, promote, demote, setspawn, setname, sell, cancel-sale
-- Added /scs player <player> <claim / *> addmember <player> to force-add a member to a claim without invitation (target can be offline but must be registered in the database)
-- Added /scs player <player> <claim / *> ban <target> <time> for time-limited bans via admin command
-- Added tab completion for all new /scs player admin claim commands with context-aware suggestions (settings vs claim names vs actions vs player names)
-- Added non-blocking tab completion for offline player claim names using getTempPlayerIfCached()
-- Removed admin bypass from /claim for player claims (admins must now use /scs player); bypass remains only for protected areas (parea / SERVER_UUID)
-- Added max-claim-price player setting in config.yml (players.default.max-claim-price, where 0 = no limit) that caps the per-chunk price calculated from chunk-cost * cost-multiplier^n
-- Added getMaxClaimPrice(Player) method in PlayerCache with permission support (scs.limit.max-claim-price.<value>)
-- Added add-max-claim-price and set-max-claim-price to /scs player settings commands and tab completion
-- Added %max-claim-price% variable to the player head lore in the profile GUI, displaying infinity when 0
-- Added max-claim-price line to en_US.yml and fr_FR.yml lang files in the player lore section
-- Added PlaceholderAPI placeholder %scs_max-claim-price%
-- Added PlaceholderAPI placeholder %scs_max-radius%
-- Added PlaceholderAPI placeholder %scs_max-roles%
-- Added PlaceholderAPI placeholder %scs_auto-purge-bypass%
-- Added PlaceholderAPI placeholder %scs_claim_description%
-- Added PlaceholderAPI placeholder %scs_claim_is_in_sale%
-- Added PlaceholderAPI placeholder %scs_claim_sale_price%
-- Added PlaceholderAPI placeholder %scs_claim_members_count%
-- Added PlaceholderAPI placeholder %scs_claim_members_online%
-- Added PlaceholderAPI placeholder %scs_claim_spawn%
-- Added PlaceholderAPI placeholder %scs_claim_chunks_count%
-- Added dynamic placeholder %scs_claim_chunk_<world>_<x>_<z>_name%
-- Added dynamic placeholder %scs_claim_chunk_<world>_<x>_<z>_owner%
-- Added dynamic placeholder %scs_claim_chunk_<world>_<x>_<z>_player%
-- Added dynamic placeholder %scs_claim_chunk_relative_<world>_<dx>_<dz>_name%
-- Added dynamic placeholder %scs_claim_chunk_relative_<world>_<dx>_<dz>_owner%
-- Added dynamic placeholder %scs_claim_chunk_relative_<world>_<dx>_<dz>_player%
-- Added dynamic placeholder %scs_claim_setting_<permission>_<role>%
-- Updated all PlaceholderAPI role placeholders to support custom roles, displaying the custom role name directly instead of falling back to Visitor
-- Added PlaceholderAPI micro-cache (200ms TTL per player) to reduce redundant claim lookups for scoreboards and TAB plugins
-- Added main.sendBedrockForm() utility method, replacing the duplicated floodgate/geyser fallback pattern across all 13 Bedrock GUI files
-- Added WebDashboard token persistence via web-tokens.json file, tokens now survive server restarts
-- Added case 3 in /scs command showing help message for incomplete commands
-- Replaced MenuPermissions1Gui, MenuPermissions2Gui, MenuPermissions3Gui with a single dynamic MenuPermissionsGui that accepts a page parameter and detects available pages from the GUI registry
-- Replaced MenuFlags1Gui, MenuFlags2Gui with a single dynamic MenuFlagsGui that accepts a page parameter and detects available pages from the GUI registry
-- Users can now create additional permission/flag pages by adding new menu_permissions_N.yml or menu_flags_N.yml files in the guis folder without code changes
-- Added /scs docs pages for admin claim management commands and max-claim-price setting
-- Replaced Proxy.newProxyInstance with direct lambdas in all SchedulerAdapter methods for better performance (eliminates dynamic proxy class generation on every scheduler call)
-- Pre-computed FlagsListener world modes with cache, added clearWorldModes() called on reload
-- Split CommandHandlers.java (12263 lines) into 4 files CommandHandlers (dispatchers/tab completion/delegates), AdminCommandHandler, MemberCommandHandler, ClaimCommandHandler; all external callers remain compatible via delegate methods
+- Fix executor issue
