@@ -2,6 +2,7 @@ package fr.xyness.SimpleClaimSystem.Types;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.bukkit.Location;
 
@@ -22,43 +23,43 @@ public class Claim {
     private int id;
 
     // UUID of the owner of the claim.
-    private UUID ownerUuid;
+    private volatile UUID ownerUuid;
 
     // Name of the owner of the claim.
-    private String ownerName;
+    private volatile String ownerName;
 
     // Name of the claim.
-    private String claimName;
+    private volatile String claimName;
 
     // Description of the claim.
-    private String description;
+    private volatile String description;
 
     // Chunks of the claim.
-    private Set<ChunkKey> chunks = new HashSet<>();
+    private Set<ChunkKey> chunks = ConcurrentHashMap.newKeySet();
 
     // UUID of the world of the claim.
     private String worldUuid;
 
     // Spawn location of the claim.
-    private Location spawnLocation;
+    private volatile Location spawnLocation;
 
     // Members map (UUID -> role name).
-    private Map<UUID, String> members = new HashMap<>();
+    private Map<UUID, String> members = new ConcurrentHashMap<>();
 
     // Banned players map (UUID -> Unban LocalDateTime).
-    private Map<UUID, LocalDateTime> banned = new HashMap<>();
+    private Map<UUID, LocalDateTime> banned = new ConcurrentHashMap<>();
 
     // Permissions map (role name -> (permission, value)).
-    private Map<String, Map<String, Boolean>> permissions = new HashMap<>();
+    private Map<String, Map<String, Boolean>> permissions = new ConcurrentHashMap<>();
 
     // Flags map (Flags -> Value).
-    private Map<String, Boolean> flags = new HashMap<>();
+    private Map<String, Boolean> flags = new ConcurrentHashMap<>();
 
     // Other things (Thing -> Value).
-    private Map<String, Object> other_things = new HashMap<>();
+    private Map<String, Object> other_things = new ConcurrentHashMap<>();
 
     // Custom roles for this claim (ordered list of role names).
-    private List<String> customRoles = new ArrayList<>();
+    private volatile List<String> customRoles = new ArrayList<>();
 
 
     // ******************
@@ -242,7 +243,10 @@ public class Claim {
     // --- Permissions (String-based roles) ---
 
     public Map<String, Map<String, Boolean>> getPermissions() { return permissions; }
-    public void setPermissions(Map<String, Map<String, Boolean>> permissions) { this.permissions = permissions; }
+    public void setPermissions(Map<String, Map<String, Boolean>> permissions) {
+        this.permissions = new ConcurrentHashMap<>();
+        permissions.forEach((k, v) -> this.permissions.put(k, new ConcurrentHashMap<>(v)));
+    }
 
     public void setPermission(String role, String key, Boolean value) {
         Map<String, Boolean> rolePerms = permissions.get(role);
@@ -269,7 +273,7 @@ public class Claim {
     // --- Flags ---
 
     public Map<String,Boolean> getFlags() { return flags; }
-    public void setFlags(Map<String,Boolean> flags) { this.flags = flags; }
+    public void setFlags(Map<String,Boolean> flags) { this.flags = new ConcurrentHashMap<>(flags); }
     public void setFlag(String key, Boolean value) { flags.put(key, value); }
     public Boolean getFlag(String key) { return flags.get(key); }
 
@@ -277,7 +281,7 @@ public class Claim {
 
     public Map<String,Object> getOtherThings() { return other_things; }
     public void setOtherThings(Map<String,Object> other_things) {
-        this.other_things = other_things;
+        this.other_things = new ConcurrentHashMap<>(other_things);
         syncCustomRolesFromOtherThings();
     }
     public Object getOtherThing(String key) { return other_things.get(key); }
@@ -305,7 +309,6 @@ public class Claim {
      * Restores customRoles from other_things map.
      * Called automatically by setOtherThings().
      */
-    @SuppressWarnings("unchecked")
     private void syncCustomRolesFromOtherThings() {
         Object raw = other_things.get("customRoles");
         if (raw instanceof List<?> list) {
