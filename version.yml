@@ -1,10 +1,78 @@
 # Version
-version: 2.1.15
+version: 2.2.0
 
 # Update date
-date: 12/04/2026
+date: 18/04/2026
 
 # Update notes
 update-notes:
-- Fixed Bedrock ClassCastException - forms were not built (.build() missing) before being sent via Floodgate/Geyser
-- Fixed role% showing in Bedrock /claims menu - now uses the correct language message (bedrock-claim-title) instead of the members one
+
+# New commands
+- "/claim create <name> — make a claim with a custom name straight away instead of claim-%n"
+- "/claim back — teleport to the last claim you walked into this session"
+- "/claim preview [radius] — shows what /claim would take before you actually commit (yellow = free, red = taken)"
+- "/claim respawn — the current claim becomes your respawn point (gate in config: claims.respawn-in-claim.enabled)"
+- "/claim template save|apply|list|delete — save a claim's perms+flags as a template, slap it on your other claims"
+- "/claim invite <player> <duration> — temporary invites (e.g. 7d). Survive restart. Member gets auto-kicked when time's up"
+- "/claim in your own claim now opens the home menu instead of yelling 'claim taken'"
+- "/scs exportAuditLogs <claimId|*> — dumps the audit log to a CSV in plugins/SimpleClaimSystem/audit-exports/"
+- "/scs resetrole <role> — reset one role's perms across every claim (was only possible for one permission at a time before)"
+
+# Config / player settings
+- "Added claims.tax — optional daily rent. If a player can't pay for X days their claims get auto-unclaimed. Needs Vault"
+- "Added players.default.default-claim-radius — /claim with no arg now respects this (capped at the player's max-radius so admins don't get bypassed)"
+- "/scs player <p> set-default-claim-radius and add-default-claim-radius"
+- "config.yml got a full pass of comments — every key now has a one-liner, every section has a header"
+
+# Bedrock parity
+- "New: MenuPlayerBedrock (the /scs player <p> profile) and MenuOnlinePlayersBedrock (online-player picker for invites/bans)"
+- "MenuHomeBedrock now has a 'Teleport to claim' button — Bedrock players couldn't teleport from /claim list at all before, which was just a bug"
+- "MenuMembersBedrock / MenuBannedBedrock got 'Invite / Ban an online player' buttons to match the Java side"
+
+# Security
+- "web-dashboard.cors-origins is now a list you can edit. Still defaults to localhost"
+- "Dashboard /auth is rate-limited — 5 tries per minute per IP, then 429. Stops the trivial brute force"
+
+# Performance
+- "Particle system rewritten. One global task instead of one per claim, skips particles that are outside the player's view distance, Y now follows the player instead of being frozen at spawn Y. Expect ~80% less spawn calls on busy servers"
+- "SQLite: WAL mode + busy_timeout=5000 + synchronous=NORMAL in the URL. Should make 'database is locked' during startup migrations disappear"
+- "DAO executor is now a bounded ThreadPoolExecutor (queue 5000). Was a newFixedThreadPool with an unbounded queue — bad idea under load"
+- "FlagsListener: pistons pushing multiple blocks in the same chunk were doing one getClaimSync per block. Dedup now. Free win on redstone-heavy claims"
+- "No more bulk SELECT * FROM scs_players on startup. Players migrate lazily when they load, which scales to however many players you've got"
+
+# Redis / Caffeine coherence
+- "addOrUpdateToCacheAsync (both caches) now actually waits for Redis to ACK before writing Caffeine. And invalidates both if Redis fails. Used to quietly diverge — a failed Redis SETEX left Caffeine with the 'new' value while Redis still had the old one, which came back on the next cache miss and overwrote Caffeine"
+- "Same fix on removeFromCacheAsync (single + bulk)"
+- "Claim creation is atomic now. Used to be 5 separate async inserts (claim + chunks + member + perms + flags) fanning out via CompletableFuture.allOf — if one failed in the middle you got half-created orphans. ClaimDAO.createClaimAtomicAsync wraps it all in a single transaction with a proper rollback"
+- "PlayerDAO.insertMultipleAsync didn't have a rollback or finally — manual setAutoCommit(false) without restoring it. HikariCP was saving our asses. Fixed"
+
+# Bug fixes
+- "Blocked-words check was inverted in 3 places (/claim create, setname, setdesc): it checked whether the blocked word contains the player input instead of the reverse. So 'fuck' blocked 'fu' but not 'afuckb'. Genius. Fixed"
+- "PlayerListener.tasks (fly tasks) wasn't cleaned on PlayerQuitEvent. Handle leaked. Fixed"
+- "Fixed RejectedExecutionException stack trace spam on PlayerQuit when the ClaimCache executor was saturated"
+- "WorldGuard scs-claim check only looked at the player's exact position. Now it scans the full chunk (and every chunk for /claim radius), so you can't bypass a WG region by standing in an unprotected corner"
+- "onPlayerMove and onPlayerRespawn were missing ignoreCancelled = true"
+- "WorldListener held onto Task references for unloaded worlds — added onWorldUnload"
+- "MenuPlayerBedrock helpers did raw (Number) casts on settings. NPE on a missing key. Now null-safe"
+- "Dropped unused redisClient field in PlayerCache"
+- "/scs help and /scs help <page> were reading claim-help-page-* keys — so /scs had dedicated help pages that were never shown. Now they read scs-help-page-* like they're supposed to"
+
+# API (additive — nothing renamed, nothing removed)
+- "Claim: new memberExpirations map + addMember(uuid, role, expiresAt) overload + getMemberExpiresAt / isTemporaryMember. removeMember clears both members + memberExpirations so you can't leak stale expirations"
+- "New types: PendingInvitation, ClaimTemplate"
+- "New DAO: ClaimTemplateDAO (save, find, findByOwner, findAll, delete, updateJsonBatchAsync)"
+- "MemberDAO: findExpiredPairsAsync, deleteExpiredAsync. INSERT now carries expires_at"
+
+# Schema
+- "Added scs_members.expires_at (nullable) + idx_members_expires. Idempotent via a new migrateAddColumn helper that checks the column via ResultSetMetaData first"
+- "Added table scs_claim_templates + idx_templates_owner"
+- "On startup, we already backfill missing permission/flag keys into every claim. Templates get the same treatment now — previously saved templates were stuck with the old set"
+
+# GUI
+- "Member GUI lore and Bedrock member list show the remaining time for temp members (%expires%). Matches how bans already work"
+- "Kicked temp members get a chat message + kick sound if they're online when it fires"
+
+# Docs
+- "/claim help page 1 now mentions /claim create and /claim radius. Page 8 now lists the moderation stuff (ban/unban/role set/respawn)"
+- "/scs help extended with a page 4 (web-token, docs, update). Page 3 now lists the importFrom* commands that were missing"
+- "/claim help / docs, /scs help / docs, and the gitbook wiki now cover everything in this release (back, preview, template, invite <duration>, exportAuditLogs, resetrole)"
