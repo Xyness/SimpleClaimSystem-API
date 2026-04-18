@@ -1,10 +1,49 @@
 # Version
-version: 2.1.15
+version: 2.2.0
 
 # Update date
-date: 12/04/2026
+date: 18/04/2026
 
 # Update notes
 update-notes:
-- Fixed Bedrock ClassCastException - forms were not built (.build() missing) before being sent via Floodgate/Geyser
-- Fixed role% showing in Bedrock /claims menu - now uses the correct language message (bedrock-claim-title) instead of the members one
+- "Added /claim create <name> to claim with a custom name straight away"
+- "Added /claim back, teleport to the last claim you walked into this session"
+- "Added /claim preview [radius] to see what /claim would take before committing"
+- "Added /claim respawn to make the current claim your respawn point"
+- "Added /claim template save, apply, list and delete"
+- "Added /claim invite <player> <duration>, temporary invites that survive a restart"
+- "/claim inside your own claim opens the home menu instead of saying the claim is taken"
+- "Added /scs exportAuditLogs <claimId|*>, a CSV in plugins/SimpleClaimSystem/audit-exports/"
+- "Added /scs resetrole <role> to reset one role across every claim"
+- "Added claims.tax, an optional daily rent that unclaims after X unpaid days"
+- "Added players.default.default-claim-radius, used by /claim with no argument"
+- "Added /scs player <p> set-default-claim-radius and add-default-claim-radius"
+- "Every key in config.yml now has a comment, every section a header"
+- "Added the Bedrock player profile and online player picker menus"
+- "Added a Teleport to claim button to the Bedrock home menu"
+- "Added Invite and Ban buttons to the Bedrock member and banned menus"
+- "web-dashboard.cors-origins is a list you can edit, still localhost by default"
+- "The dashboard /auth route is rate limited to 5 tries per minute per IP"
+- "Rewrote the particle system, one global task instead of one per claim"
+- "Particles outside the view distance are skipped and Y follows the player"
+- "SQLite runs in WAL mode with a busy timeout, which should end database is locked at startup"
+- "The DAO executor is bounded instead of queueing without a limit"
+- "A piston pushing several blocks in the same chunk looks the claim up once"
+- "Players migrate lazily instead of a bulk select of the whole table at startup"
+- "The Redis and Caffeine caches no longer diverge when a Redis write fails"
+- "Claim creation is one transaction with a rollback instead of five separate inserts"
+- "Fixed the blocked words check being inverted in /claim create, setname and setdesc"
+- "Fixed the fly tasks not being cleaned up on quit"
+- "Fixed the stack trace spam on quit when the claim cache executor was saturated"
+- "The WorldGuard scs-claim check scans the whole chunk instead of the exact position"
+- "Added ignoreCancelled to the move and respawn listeners"
+- "Fixed tasks being kept for unloaded worlds"
+- "Fixed a NullPointerException on a missing Bedrock setting"
+- "Fixed /scs help reading the /claim help pages instead of its own"
+- "API: temporary members, addMember with an expiry, getMemberExpiresAt and isTemporaryMember"
+- "API: added the PendingInvitation and ClaimTemplate types and the template DAO"
+- "Added scs_members.expires_at and the scs_claim_templates table"
+- "Templates get the new permission and flag keys at startup like claims do"
+- "Member menus show the remaining time of a temporary member (%expires%)"
+- "A kicked temporary member gets a message and a sound if they are online"
+- "/claim help and /scs help cover the new commands"
