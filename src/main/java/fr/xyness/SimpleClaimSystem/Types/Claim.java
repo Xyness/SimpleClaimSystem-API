@@ -46,6 +46,12 @@ public class Claim {
     // Members map (UUID -> role name).
     private Map<UUID, String> members = new ConcurrentHashMap<>();
 
+    // Temporary-invite expirations (UUID -> expiration timestamp). Only entries for members with a
+    // bounded membership (set via /claim invite <player> <duration>) are present; permanent members
+    // are absent from the map. Maintained in parallel with {@link #members} — stays null-clean via
+    // the add/remove helpers below.
+    private Map<UUID, LocalDateTime> memberExpirations = new ConcurrentHashMap<>();
+
     // Banned players map (UUID -> Unban LocalDateTime).
     private Map<UUID, LocalDateTime> banned = new ConcurrentHashMap<>();
 
@@ -206,10 +212,38 @@ public class Claim {
     public Map<UUID, String> getMembers() { return members; }
     public void setMembers(Map<UUID, String> members) { this.members = members; }
     public void addMember(UUID uuid, String role) { members.put(uuid, role); }
-    public void removeMember(UUID uuid) { members.remove(uuid); }
+    public void removeMember(UUID uuid) {
+        members.remove(uuid);
+        memberExpirations.remove(uuid); // keep the parallel map consistent
+    }
 
     /** Backward-compatible method accepting ClaimRole enum. */
     public void addMember(UUID uuid, ClaimRole role) { members.put(uuid, role.name()); }
+
+    /**
+     * Adds a member with an optional expiration timestamp.
+     * Pass {@code null} for a permanent membership (same as {@link #addMember(UUID, String)}).
+     */
+    public void addMember(UUID uuid, String role, LocalDateTime expiresAt) {
+        members.put(uuid, role);
+        if (expiresAt == null) memberExpirations.remove(uuid);
+        else memberExpirations.put(uuid, expiresAt);
+    }
+
+    // --- Member expirations (for temporary invitations) ---
+
+    /** @return map of member UUIDs to their membership expiration. Missing keys = permanent member. */
+    public Map<UUID, LocalDateTime> getMemberExpirations() { return memberExpirations; }
+
+    public void setMemberExpirations(Map<UUID, LocalDateTime> memberExpirations) {
+        this.memberExpirations = memberExpirations == null ? new ConcurrentHashMap<>() : memberExpirations;
+    }
+
+    /** @return the expiration timestamp for this member, or {@code null} if permanent / not a member. */
+    public LocalDateTime getMemberExpiresAt(UUID uuid) { return memberExpirations.get(uuid); }
+
+    /** @return true if this member has a bounded (temporary) membership. */
+    public boolean isTemporaryMember(UUID uuid) { return memberExpirations.containsKey(uuid); }
 
     public String getRole(UUID uuid) {
         return members.getOrDefault(uuid, ClaimRole.VISITOR.name());
