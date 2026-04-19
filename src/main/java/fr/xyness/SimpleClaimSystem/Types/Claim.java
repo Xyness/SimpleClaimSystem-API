@@ -3,6 +3,7 @@ package fr.xyness.SimpleClaimSystem.Types;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.bukkit.Location;
 
@@ -65,7 +66,7 @@ public class Claim {
     private Map<String, Object> other_things = new ConcurrentHashMap<>();
 
     // Custom roles for this claim (ordered list of role names).
-    private volatile List<String> customRoles = new ArrayList<>();
+    private volatile List<String> customRoles = new CopyOnWriteArrayList<>();
 
 
     // ******************
@@ -179,50 +180,116 @@ public class Claim {
         return Integer.hashCode(id);
     }
 
+    /** @return The DB id of the claim. */
     public int getId() { return id; }
+
+    /** @param id The DB id to set. */
     public void setId(int id) { this.id = id; }
 
+    /** @return The owner's UUID. */
     public UUID getOwnerUuid() { return ownerUuid; }
+
+    /** @param ownerUuid The new owner's UUID. */
     public void setOwnerUuid(UUID ownerUuid) { this.ownerUuid = ownerUuid; }
 
+    /** @return The owner's last known name. */
     public String getOwnerName() { return ownerName; }
+
+    /** @param ownerName The new owner name. */
     public void setOwnerName(String ownerName) { this.ownerName = ownerName; }
 
+    /** @return The claim name. */
     public String getClaimName() { return claimName; }
+
+    /** @param claimName The new claim name. */
     public void setClaimName(String claimName) { this.claimName = claimName; }
 
+    /** @return The claim description, possibly empty. */
     public String getDescription() { return description; }
+
+    /** @param description The new description. */
     public void setDescription(String description) { this.description = description; }
 
+    /** @return The chunk keys that make up the claim. */
     public Set<ChunkKey> getChunks() { return chunks; }
+
+    /** @param chunks The new chunk set. */
     public void setChunks(Set<ChunkKey> chunks) { this.chunks = chunks; }
+
+    /** @param key The chunk to add. */
     public void addChunk(ChunkKey key) { chunks.add(key); }
+
+    /** @param chunks The chunks to add in bulk. */
     public void addChunks(Set<ChunkKey> chunks) { this.chunks.addAll(chunks); }
+
+    /** @param key The chunk to remove. */
     public void removeChunk(ChunkKey key) { chunks.remove(key); }
+
+    /**
+     * Tells whether the claim contains the given chunk.
+     *
+     * @param key The chunk key.
+     * @return true if the chunk is part of this claim.
+     */
     public boolean containsChunk(ChunkKey key) { return chunks.contains(key); }
 
+    /** @return The world UUID (as a string). */
     public String getWorldUuid() { return worldUuid; }
+
+    /** @param worldUuid The new world UUID. */
     public void setWorldName(String worldUuid) { this.worldUuid = worldUuid; }
 
+    /** @return The claim's teleport spawn location. */
     public Location getSpawnLocation() { return spawnLocation; }
+
+    /** @param spawnLocation The new teleport spawn location. */
     public void setSpawnLocation(Location spawnLocation) { this.spawnLocation = spawnLocation; }
 
-    // --- Members (String-based roles) ---
 
+    // *************
+    // *  Members  *
+    // *************
+
+
+    /** @return The members map, UUID to role name. */
     public Map<UUID, String> getMembers() { return members; }
+
+    /** @param members The new members map. */
     public void setMembers(Map<UUID, String> members) { this.members = members; }
+
+    /**
+     * Adds a permanent member to the claim.
+     *
+     * @param uuid The member's UUID.
+     * @param role The role name.
+     */
     public void addMember(UUID uuid, String role) { members.put(uuid, role); }
+
+    /**
+     * Removes a member. Clears the parallel expiration entry to avoid stale data.
+     *
+     * @param uuid The member's UUID.
+     */
     public void removeMember(UUID uuid) {
         members.remove(uuid);
-        memberExpirations.remove(uuid); // keep the parallel map consistent
+        memberExpirations.remove(uuid);
     }
 
-    /** Backward-compatible method accepting ClaimRole enum. */
+    /**
+     * Adds a permanent member using the ClaimRole enum (convenience).
+     *
+     * @param uuid The member's UUID.
+     * @param role The role enum.
+     */
     public void addMember(UUID uuid, ClaimRole role) { members.put(uuid, role.name()); }
 
     /**
-     * Adds a member with an optional expiration timestamp.
-     * Pass {@code null} for a permanent membership (same as {@link #addMember(UUID, String)}).
+     * Adds a member with an optional expiration timestamp. Null expiresAt is equivalent to
+     * the permanent {@link #addMember(UUID, String)} variant.
+     *
+     * @param uuid The member's UUID.
+     * @param role The role name.
+     * @param expiresAt The expiry timestamp, or null for permanent.
      */
     public void addMember(UUID uuid, String role, LocalDateTime expiresAt) {
         members.put(uuid, role);
@@ -230,26 +297,46 @@ public class Claim {
         else memberExpirations.put(uuid, expiresAt);
     }
 
-    // --- Member expirations (for temporary invitations) ---
-
-    /** @return map of member UUIDs to their membership expiration. Missing keys = permanent member. */
+    /** @return The map of member UUIDs to their membership expiration. Missing keys = permanent. */
     public Map<UUID, LocalDateTime> getMemberExpirations() { return memberExpirations; }
 
+    /** @param memberExpirations The new expiration map; null resets to an empty map. */
     public void setMemberExpirations(Map<UUID, LocalDateTime> memberExpirations) {
         this.memberExpirations = memberExpirations == null ? new ConcurrentHashMap<>() : memberExpirations;
     }
 
-    /** @return the expiration timestamp for this member, or {@code null} if permanent / not a member. */
+    /**
+     * Returns the expiration timestamp for a member.
+     *
+     * @param uuid The member's UUID.
+     * @return The expiry timestamp, or null if the membership is permanent or the player is not a member.
+     */
     public LocalDateTime getMemberExpiresAt(UUID uuid) { return memberExpirations.get(uuid); }
 
-    /** @return true if this member has a bounded (temporary) membership. */
+    /**
+     * Tells whether a member has a bounded (temporary) membership.
+     *
+     * @param uuid The member's UUID.
+     * @return true if the member has an expiry set.
+     */
     public boolean isTemporaryMember(UUID uuid) { return memberExpirations.containsKey(uuid); }
 
+    /**
+     * Returns the role name for the given player, or VISITOR if they are not a member.
+     *
+     * @param uuid The player's UUID.
+     * @return The role name (default, custom, or VISITOR fallback).
+     */
     public String getRole(UUID uuid) {
         return members.getOrDefault(uuid, ClaimRole.VISITOR.name());
     }
 
-    /** Gets the role as ClaimRole enum, or VISITOR if it's a custom role. */
+    /**
+     * Returns the role as a ClaimRole enum, falling back to VISITOR for custom roles.
+     *
+     * @param uuid The player's UUID.
+     * @return The enum value.
+     */
     public ClaimRole getRoleEnum(UUID uuid) {
         String role = getRole(uuid);
         try {
@@ -259,34 +346,98 @@ public class Claim {
         }
     }
 
+    /**
+     * Tells whether the given player is a member of the claim.
+     *
+     * @param uuid The player's UUID.
+     * @return true if the player is a member.
+     */
     public boolean isMember(UUID uuid) { return members.containsKey(uuid); }
 
-    // --- Banned ---
 
+    // ************
+    // *  Banned  *
+    // ************
+
+
+    /** @return The banned map, UUID to ban expiry timestamp. */
     public Map<UUID, LocalDateTime> getBanned() { return banned; }
+
+    /**
+     * Returns the ban expiry for a given UUID.
+     *
+     * @param banUuid The banned player's UUID.
+     * @return The expiry timestamp, or null if not banned.
+     */
     public LocalDateTime getBanTime(UUID banUuid) { return banned.get(banUuid); }
+
+    /** @param banned The new banned map. */
     public void setBanned(Map<UUID, LocalDateTime> banned) { this.banned = banned; }
+
+    /**
+     * Bans a player until the given date.
+     *
+     * @param uuid The banned player's UUID.
+     * @param date The ban expiry timestamp.
+     */
     public void banPlayer(UUID uuid, LocalDateTime date) { banned.put(uuid, date); }
+
+    /**
+     * Unbans a player.
+     *
+     * @param uuid The banned player's UUID.
+     */
     public void unbanPlayer(UUID uuid) { banned.remove(uuid); }
 
+    /**
+     * Tells whether a player is currently banned (expiry in the future).
+     *
+     * @param uuid The player's UUID.
+     * @return true if banned.
+     */
     public boolean isBanned(UUID uuid) {
     	LocalDateTime date = banned.get(uuid);
         return date != null && LocalDateTime.now().isBefore(date);
     }
 
-    // --- Permissions (String-based roles) ---
 
+    // *****************
+    // *  Permissions  *
+    // *****************
+
+
+    /** @return The permissions map, role name to permission map. */
     public Map<String, Map<String, Boolean>> getPermissions() { return permissions; }
+
+    /**
+     * Replaces the permission map. The input is defensively copied into thread-safe maps.
+     *
+     * @param permissions The new permissions map.
+     */
     public void setPermissions(Map<String, Map<String, Boolean>> permissions) {
         this.permissions = new ConcurrentHashMap<>();
         permissions.forEach((k, v) -> this.permissions.put(k, new ConcurrentHashMap<>(v)));
     }
 
+    /**
+     * Sets a single permission value on a role.
+     *
+     * @param role The role name.
+     * @param key The permission key.
+     * @param value The permission value.
+     */
     public void setPermission(String role, String key, Boolean value) {
         Map<String, Boolean> rolePerms = permissions.get(role);
         if (rolePerms != null) rolePerms.put(key, value);
     }
 
+    /**
+     * Returns the permission value for a role. OWNER is always allowed.
+     *
+     * @param role The role name.
+     * @param key The permission key.
+     * @return true if allowed, false otherwise.
+     */
     public Boolean getPermission(String role, String key) {
     	if (ClaimRole.OWNER.name().equals(role)) return true;
         Map<String, Boolean> rolePerms = permissions.get(role);
@@ -294,46 +445,131 @@ public class Claim {
         return rolePerms.getOrDefault(key, false);
     }
 
-    /** Backward-compatible method accepting ClaimRole enum. */
+    /**
+     * Sets a permission value using the ClaimRole enum (convenience).
+     *
+     * @param role The role enum.
+     * @param key The permission key.
+     * @param value The permission value.
+     */
     public void setPermission(ClaimRole role, String key, Boolean value) {
         setPermission(role.name(), key, value);
     }
 
-    /** Backward-compatible method accepting ClaimRole enum. */
+    /**
+     * Returns the permission value using the ClaimRole enum (convenience).
+     *
+     * @param role The role enum.
+     * @param key The permission key.
+     * @return true if allowed.
+     */
     public Boolean getPermission(ClaimRole role, String key) {
         return getPermission(role.name(), key);
     }
 
-    // --- Flags ---
 
+    // ***********
+    // *  Flags  *
+    // ***********
+
+
+    /** @return The flags map. */
     public Map<String,Boolean> getFlags() { return flags; }
+
+    /**
+     * Replaces the flags map with a defensive thread-safe copy.
+     *
+     * @param flags The new flags map.
+     */
     public void setFlags(Map<String,Boolean> flags) { this.flags = new ConcurrentHashMap<>(flags); }
+
+    /**
+     * Sets a single flag value.
+     *
+     * @param key The flag key.
+     * @param value The flag value.
+     */
     public void setFlag(String key, Boolean value) { flags.put(key, value); }
+
+    /**
+     * Returns a flag value, or null if unset.
+     *
+     * @param key The flag key.
+     * @return The flag value.
+     */
     public Boolean getFlag(String key) { return flags.get(key); }
 
-    // --- Other things ---
 
+    // ******************
+    // *  Other things  *
+    // ******************
+
+
+    /** @return The miscellaneous claim-level metadata map. */
     public Map<String,Object> getOtherThings() { return other_things; }
+
+    /**
+     * Replaces the metadata map. Custom roles are re-read from the map to stay in sync.
+     *
+     * @param other_things The new metadata map.
+     */
     public void setOtherThings(Map<String,Object> other_things) {
         this.other_things = new ConcurrentHashMap<>(other_things);
         syncCustomRolesFromOtherThings();
     }
+
+    /**
+     * Looks up a metadata entry by key.
+     *
+     * @param key The key.
+     * @return The value, or null if unset.
+     */
     public Object getOtherThing(String key) { return other_things.get(key); }
+
+    /**
+     * Sets or replaces a metadata entry.
+     *
+     * @param key The key.
+     * @param value The value.
+     */
     public void setOtherThing(String key, Object value) { other_things.put(key, value); }
 
-    // --- Custom Roles ---
 
+    // ******************
+    // *  Custom roles  *
+    // ******************
+
+
+    /** @return The custom role names list. */
     public List<String> getCustomRoles() { return customRoles; }
+
+    /**
+     * Replaces the custom role list. Always wraps into a thread-safe list because callers
+     * may pass an ArrayList from JSON deserialisation, which would expose us to CME on
+     * concurrent reads from the cache.
+     *
+     * @param customRoles The new list.
+     */
     public void setCustomRoles(List<String> customRoles) {
-        this.customRoles = customRoles;
-        other_things.put("customRoles", customRoles);
+        this.customRoles = new CopyOnWriteArrayList<>(customRoles);
+        other_things.put("customRoles", this.customRoles);
     }
 
+    /**
+     * Adds a custom role (no-op if already present).
+     *
+     * @param roleName The role name.
+     */
     public void addCustomRole(String roleName) {
         if (!customRoles.contains(roleName)) customRoles.add(roleName);
         other_things.put("customRoles", customRoles);
     }
 
+    /**
+     * Removes a custom role.
+     *
+     * @param roleName The role name.
+     */
     public void removeCustomRole(String roleName) {
         customRoles.remove(roleName);
         other_things.put("customRoles", customRoles);
@@ -346,13 +582,20 @@ public class Claim {
     private void syncCustomRolesFromOtherThings() {
         Object raw = other_things.get("customRoles");
         if (raw instanceof List<?> list) {
-            customRoles = new ArrayList<>();
+            CopyOnWriteArrayList<String> rebuilt = new CopyOnWriteArrayList<>();
             for (Object o : list) {
-                customRoles.add(String.valueOf(o));
+                rebuilt.add(String.valueOf(o));
             }
+            customRoles = rebuilt;
         }
     }
 
+    /**
+     * Tells whether a custom role with the given name exists on the claim.
+     *
+     * @param roleName The role name.
+     * @return true if the role is a custom role of this claim.
+     */
     public boolean hasCustomRole(String roleName) {
         return customRoles.contains(roleName);
     }

@@ -20,7 +20,7 @@ This module allows developers to integrate with SimpleClaimSystem from their own
     <dependency>
         <groupId>com.github.Xyness</groupId>
         <artifactId>SimpleClaimSystem-API</artifactId>
-        <version>v2.2.0</version>
+        <version>v2.2.1</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
@@ -34,7 +34,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.Xyness:SimpleClaimSystem-API:v2.2.0'
+    compileOnly 'com.github.Xyness:SimpleClaimSystem-API:v2.2.1'
 }
 ```
 
@@ -46,7 +46,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.Xyness:SimpleClaimSystem-API:v2.2.0")
+    compileOnly("com.github.Xyness:SimpleClaimSystem-API:v2.2.1")
 }
 ```
 
@@ -254,6 +254,36 @@ boolean economy = api.getBooleanSetting("claims.economy.enabled", false);
 String lang = api.getStringSetting("lang", "en_US");
 ```
 
+### Favorites
+
+```java
+// Toggle a favourite
+boolean wasNewlyAdded = api.addFavorite(playerUuid, claim);
+boolean wasRemoved   = api.removeFavorite(playerUuid, claim);
+
+// Check
+boolean fav = api.isFavorite(playerUuid, claim.getId());
+
+// List
+List<Integer> ids   = api.getFavoriteClaimIds(playerUuid);
+List<Claim>   live  = api.getFavoriteClaims(playerUuid); // ids that no longer resolve are dropped
+```
+
+### Listening to favorites
+
+```java
+@EventHandler
+public void onClaimFavorite(ClaimFavoriteEvent event) {
+    Claim claim = event.getClaim();
+    UUID playerId = event.getPlayerId();
+    if (event.getAction() == ClaimFavoriteEvent.Action.FAVORITE) {
+        // player just favourited the claim
+    } else {
+        // player just unfavourited the claim
+    }
+}
+```
+
 ## API Reference
 
 ### Claim Queries
@@ -335,6 +365,16 @@ String lang = api.getStringSetting("lang", "en_US");
 | `getIntSetting(String, int)` | Get integer setting |
 | `getDoubleSetting(String, double)` | Get double setting |
 
+### Favorites
+
+| Method | Description |
+|--------|-------------|
+| `isFavorite(UUID, int)` | Check whether a player has favourited a claim id |
+| `addFavorite(UUID, Claim)` | Add a claim to the player's favourites (fires `ClaimFavoriteEvent`) |
+| `removeFavorite(UUID, Claim)` | Remove a claim from the player's favourites (fires `ClaimFavoriteEvent`) |
+| `getFavoriteClaimIds(UUID)` | Raw list of stored favourite ids |
+| `getFavoriteClaims(UUID)` | Resolved live claims (auto-cleans deleted ids) |
+
 ## Roles
 
 SimpleClaimSystem supports **custom roles** in addition to the 4 default roles.
@@ -397,6 +437,7 @@ SimpleClaimSystem fires custom Bukkit events for all claim actions. Listen to th
 | `ClaimPermissionChangeEvent` | Fired when a claim permission is changed | No |
 | `ClaimChunkEvent` | Fired when a chunk is added to or removed from a claim | No |
 | `ClaimMergeEvent` | Fired when multiple claims are merged | No |
+| `ClaimFavoriteEvent` | Fired when a player favourites or unfavourites a claim | No |
 
 ### Listening to Events
 

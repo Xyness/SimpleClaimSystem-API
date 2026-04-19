@@ -483,4 +483,57 @@ public interface SCS_API {
      */
     double getDoubleSetting(String key, double defaultValue);
 
+
+    // *****************
+    // *  Favourites  *
+    // *****************
+
+
+    /**
+     * Tells whether the given player has favourited the given claim.
+     *
+     * @param playerUuid The player UUID.
+     * @param claimId The claim DB id.
+     * @return true if the claim is in the player's favourites.
+     */
+    boolean isFavorite(UUID playerUuid, int claimId);
+
+    /**
+     * Adds a claim to the player's favourites and fires a ClaimFavoriteEvent.
+     * No-op if the claim is already favourited.
+     *
+     * @param playerUuid The player UUID.
+     * @param claim The claim to favourite.
+     * @return true if the claim was newly added, false if already present.
+     */
+    boolean addFavorite(UUID playerUuid, Claim claim);
+
+    /**
+     * Removes a claim from the player's favourites and fires a ClaimFavoriteEvent.
+     * No-op if the claim wasn't favourited.
+     *
+     * @param playerUuid The player UUID.
+     * @param claim The claim to unfavourite.
+     * @return true if a favourite was removed, false if it wasn't present.
+     */
+    boolean removeFavorite(UUID playerUuid, Claim claim);
+
+    /**
+     * Returns the player's favourited claim ids. Stored ids only — does not check whether each
+     * claim still exists. Use {@link #getFavoriteClaims(UUID)} for the resolved-and-cleaned list.
+     *
+     * @param playerUuid The player UUID.
+     * @return A list of claim ids, possibly empty.
+     */
+    List<Integer> getFavoriteClaimIds(UUID playerUuid);
+
+    /**
+     * Returns the player's favourited claims, resolved against the cache. Ids that no longer
+     * resolve are dropped from the returned list and lazily cleaned from storage.
+     *
+     * @param playerUuid The player UUID.
+     * @return A list of resolved claims, possibly empty.
+     */
+    List<Claim> getFavoriteClaims(UUID playerUuid);
+
 }
