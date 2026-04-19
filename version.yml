@@ -1,28 +1,9 @@
 # Version
-version: 2.2.1
+version: 2.2.2
 
 # Update date
 date: 19/04/2026
 
 # Update notes
 update-notes:
-- "Added /cc <message> and /claim chat, one shot or a toggle of your normal chat"
-- "Added /claim favorite and /claim favorites, bookmarks that clean themselves up"
-- "Added /claim stats [name], chunks, members, banned players and top audit actions"
-- "Added /claim list <filter>, a name search you can click to teleport"
-- "Claim map cells have a hover with the name, owner, chunk count and description"
-- "Temporary invites send a warning an hour before they expire"
-- "Auto-purge warns you on join before your claims are reaped (claims.auto-purge.warn-days-before)"
-- "Added map placeholders for chunks, members, roles, spawn, sale state and owner, on all four map hooks"
-- "The dashboard rate limit covers every endpoint, 120 requests per minute per IP"
-- "Added web-dashboard.token-ttl-hours, regenerate an old token to give it an expiry"
-- "auto-addchunk, auto-delchunk and auto-merge validate the claim name before running a command"
-- "The GUI command action strips %player% before running it"
-- "Claim loading reads chunks, members and banned players in parallel instead of one after another"
-- "Explosion dispatch uses an EnumMap, charged creepers no longer depend on iteration order"
-- "The claim cache executor no longer drops tasks when its queue is full, which read as missing protections"
-- "Expired member cleanup runs in batches of 500 instead of one long locking delete"
-- "Added a paginated PlayerDAO.findAllAsync overload"
-- "Fixed a NullPointerException on the boss bar for a player in a custom role"
-- "Fixed customRoles being a plain list, concurrent reads could throw"
-- "Moved the template and social commands out of ClaimCommandHandler"
+- "Fix Redis closing issue"
