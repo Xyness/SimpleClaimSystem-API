@@ -3,8 +3,12 @@ plugins {
     id 'maven-publish'
 }
 
-group = 'fr.xyness'
-version = '2.1.8'
+def fileVersion = (file('version.yml').text =~ /(?m)^version:\s*(.+)$/)[0][1].trim()
+def cliVersion = findProperty('version')
+def cliGroup = findProperty('group')
+
+group = (cliGroup && cliGroup != 'unspecified') ? cliGroup : 'fr.xyness'
+version = (cliVersion && cliVersion != 'unspecified') ? cliVersion : fileVersion
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
