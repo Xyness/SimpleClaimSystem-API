@@ -1,28 +1,9 @@
 # Version
-version: 2.2.1
+version: 2.2.2
 
 # Update date
 date: 19/04/2026
 
 # Update notes
 update-notes:
-- "Claim.customRoles is a CopyOnWriteArrayList. Was a volatile ArrayList, which protected the reference but not the list. CME under concurrent reads"
-- "/cc <msg> and /claim chat. /cc is one-shot, /claim chat toggles your normal chat into the claim"
-- "/claim favorite + /claim favorites. Bookmark claims, list them. Auto-cleans entries when the claim is gone"
-- "/claim stats [name]. Chunks, members, banned, top audit actions"
-- "/claim list <filter>. Chat-based name search, click any match to TP"
-- "/claim map cells now have a hover with name, owner, chunk count, description"
-- "Temp invites send a 1h heads-up before they expire. Skipped on invites under 1h, silent if the member is offline"
-- "Auto-purge sends you a warning on join if your claims are about to be reaped, with the date. New: claims.auto-purge.warn-days-before (default 7, 0 = off)"
-- "Map hooks gained a pile of placeholders: %chunk_count%, %member_count%, %banned_count%, %role_member_count%, %role_moderator_count%, %role_visitor_count%, %custom_role_count%, %world%, %spawn_x/y/z%, %for_sale%, %is_parea%, %claim_id%, %owner_uuid%. All four hooks (Dynmap, BlueMap, Pl3xMap, squaremap) share the same set"
-- "Dashboard rate limit covers every endpoint, not just /auth. 120 req/min/IP, then 429"
-- "Dashboard tokens have a TTL. web-dashboard.token-ttl-hours (default 24, 0 disables). Old tokens stay alive forever, regenerate them to opt in"
-- "auto-addchunk / auto-delchunk / auto-merge validate the target claim name against [A-Za-z0-9_:.-] before stuffing it into a dispatchCommand. Bukkit doesn't actually split on ';' so it was theoretical, but admins can loosen claims.allowed-regex-name and we want a safety belt"
-- "GUI CommandAction strips %player% to [A-Za-z0-9_.] before running. Floodgate's leading dot still works"
-- "Claim DB load runs chunks / members / banned in parallel. Was three sequential round-trips on the same connection. Wall-clock drops to max(...) instead of sum(...)"
-- "Explosion dispatch is an EnumMap<EntityType, ...> instead of HashMap<Predicate<Entity>, ...>. O(1), and charged-creeper handling no longer depends on HashMap iteration order (which used to randomly win the race)"
-- "ClaimCache executor doesn't drop tasks anymore. Queue 5000, on overflow we log a warning and run on the caller thread. Used to silently abort, which showed up as missing protections"
-- "Expired-member cleanup runs in batches of 500. One bulk DELETE on a big table was a long lock, and SQLite doesn't ship with DELETE LIMIT in the standard build, so SELECT-then-batched-DELETE"
-- "PlayerDAO.findAllAsync got a paginated overload. Old no-arg one is still unbounded for compat, new callers should page"
-- "Bossbar NPE for players in a custom role. getMessage('bossbar-<role>') was null and we hit replaceText on it. Falls back to bossbar-member, hides if even that's missing"
-- "Started splitting ClaimCommandHandler. /claim template moved to ClaimTemplateHandler (173 lines). favorite / favorites / stats / chat / list-search moved to ClaimSocialHandler (264 lines). ClaimCommandHandler keeps thin delegates so nothing external moves. 5.4k lines remain, more extractions to come"
+- "Fix Redis closing issue"
