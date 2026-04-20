@@ -1,9 +1,14 @@
 # Version
-version: 2.2.3
+version: 2.2.4
 
 # Update date
-date: 19/04/2026
+date: 20/04/2026
 
 # Update notes
 update-notes:
-- "Fix MySQL index issues"
+- "Nexo, Oraxen and ItemsAdder glyphs work in menus (titles, names, lores)"
+- "Big Redis rework, no more timeouts with many chunks"
+- "Race fix when two players claim the same chunk at once"
+- "UUID change now follows claims, members, bans and templates"
+- "Configurable cache thread pool (automatic or manual)"
+- "Progress message when /claim radius takes a while"
