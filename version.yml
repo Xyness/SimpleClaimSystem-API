@@ -1,15 +1,16 @@
 # Version
-version: 2.2.5
+version: 2.2.6
 
 # Update date
 date: 21/04/2026
 
 # Update notes
 update-notes:
-- "New /scs player <player> manage-claim <claim> syntax to avoid argument conflicts"
-- "Admin commands to create, delete and assign custom roles"
-- "Tab completion now lists claims of offline players"
-- "/scs player addmember/promote/demote now updates bossbar, Discord and events"
-- "Player cache now shares the same thread pool config as the claim cache"
-- "/scs metrics:claims shows cached/total claim count"
-- "Fixed async error on favorite claim toggle"
+- "gui-title in menu yml now accepts raw MiniMessage (embed Nexo/Oraxen glyphs directly to position GUI backgrounds)"
+- "Nexo integration now exposes the <shift:N> tag for pixel offsets (alongside <glyph:name>)"
+- "Faster interact events: material dispatch replaces the linear predicate scan in SettingsListener"
+- "Web dashboard now validates claim names and descriptions with the same rules as in-game commands"
+- "Hook retry timers are cancelled on /reload and plugin disable (no more stale probes)"
+- "Squaremap overlays are now cleared on reload, matching the other map hooks"
+- "Added an explicit index on scs_members.claim_id for better query planning on SQLite"
+- "Chunk-load particles now batch + dedupe per claim (fixes ClaimCache executor saturation on heavy chunk streaming)"
