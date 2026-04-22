@@ -1,16 +1,13 @@
 # Version
-version: 2.2.6
+version: 2.3.0
 
 # Update date
-date: 21/04/2026
+date: 22/04/2026
 
 # Update notes
 update-notes:
-- "gui-title in menu yml now accepts raw MiniMessage (embed Nexo/Oraxen glyphs directly to position GUI backgrounds)"
-- "Nexo integration now exposes the <shift:N> tag for pixel offsets (alongside <glyph:name>)"
-- "Faster interact events: material dispatch replaces the linear predicate scan in SettingsListener"
-- "Web dashboard now validates claim names and descriptions with the same rules as in-game commands"
-- "Hook retry timers are cancelled on /reload and plugin disable (no more stale probes)"
-- "Squaremap overlays are now cleared on reload, matching the other map hooks"
-- "Added an explicit index on scs_members.claim_id for better query planning on SQLite"
-- "Chunk-load particles now batch + dedupe per claim (fixes ClaimCache executor saturation on heavy chunk streaming)"
+- "New hooks: config block — disable any integration (Vault, WorldGuard, Dynmap, Lands, Nexo, etc.) with a single flag"
+- "New bedrock.force-java-menus option — Bedrock players see the Java chest GUIs (translated by Geyser) instead of native forms"
+- "Bedrock menus are now fully customizable via bedrock-guis/*.yml (one yml per menu, matching the Java guis/*.yml system)"
+- "All 16 Bedrock menu titles, static buttons and icons can be skinned without touching the jar"
+- "menu_flags.yml / menu_permissions.yml accept per-flag and per-permission text overrides"
