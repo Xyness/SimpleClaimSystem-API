@@ -1,13 +1,11 @@
 # Version
-version: 2.3.0
+version: 3.2.1
 
 # Update date
-date: 22/04/2026
+date: 23/04/2026
 
 # Update notes
 update-notes:
-- "Added a hooks section in config.yml, any integration can be disabled with one flag"
-- "Added bedrock.force-java-menus, Bedrock players get the Java chest menus translated by Geyser"
-- "Bedrock menus are customizable through bedrock-guis/*.yml, one file per menu"
-- "The 16 Bedrock menu titles, buttons and icons can be changed without touching the jar"
-- "menu_flags.yml and menu_permissions.yml accept per flag and per permission text overrides"
+- "Members can now leave a claim themselves"
+- "Bedrock /claim list now shows claims you're a member of, matching the Java version, with a dedicated per-claim menu for non-owners"
+- "Fixed a bug where riding into a claim you can't enter would dismount you and leave you stuck in flight mode"
