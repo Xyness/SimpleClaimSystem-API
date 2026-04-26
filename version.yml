@@ -10,3 +10,5 @@ update-notes:
 - "Fixed /claim list issue"
 - "Fixed drag item issue (item loss)"
 - "Fixed permissions/flags issue for bedrock users"
+- "Fixed hiden lore in MC version > 1.21.11"
+- "Fixed Middle click button -> replacing by Shift + Right-click"
