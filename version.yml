@@ -1,14 +1,14 @@
 # Version
-version: 2.3.2
+version: 2.3.3
 
 # Update date
 date: 26/04/2026
 
 # Update notes
 update-notes:
-- "Reduce .jar file 10mb to ~1mb (using library loader instead of shaded classes)"
-- "Fixed /claim list issue"
-- "Fixed drag item issue (item loss)"
-- "Fixed permissions/flags issue for bedrock users"
-- "Fixed hiden lore in MC version > 1.21.11"
-- "Fixed Middle click button -> replacing by Shift + Right-click"
+- "Fixed a crash on quit when a player owned a very large claim"
+- "Split INTERACT_LECTERN into INTERACT_LECTERN_READ and INTERACT_LECTERN_TAKE"
+- "The startup migration removes obsolete permission and flag keys from claims and templates"
+- "Custom roles inherit the claim MEMBER row when new permission keys are added"
+- "Added a permission per /scs subcommand, granular access without scs.admin.*"
+- "Fixed /scs reload checking scs.claim.reload instead of scs.admin.reload"
