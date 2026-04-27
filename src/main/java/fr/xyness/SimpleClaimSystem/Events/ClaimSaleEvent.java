@@ -1,5 +1,6 @@
 package fr.xyness.SimpleClaimSystem.Events;
 
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
 import fr.xyness.SimpleClaimSystem.Types.Claim;
@@ -7,9 +8,9 @@ import fr.xyness.SimpleClaimSystem.Types.Claim;
 import java.util.UUID;
 
 /**
- * Called when a claim sale status changes (listed, cancelled, bought).
+ * Called when a claim sale status changes (listed, cancelled, bought). Cancellable.
  */
-public class ClaimSaleEvent extends ClaimEvent {
+public class ClaimSaleEvent extends ClaimEvent implements Cancellable {
 
     private static final HandlerList HANDLERS = new HandlerList();
 
@@ -19,6 +20,7 @@ public class ClaimSaleEvent extends ClaimEvent {
     private final Action action;
     private final UUID playerId;
     private final double price;
+    private boolean cancelled;
 
     public ClaimSaleEvent(Claim claim, Action action, UUID playerId, double price) {
         super(claim);
@@ -36,6 +38,8 @@ public class ClaimSaleEvent extends ClaimEvent {
     /** Gets the sale price. */
     public double getPrice() { return price; }
 
+    @Override public boolean isCancelled() { return cancelled; }
+    @Override public void setCancelled(boolean cancel) { this.cancelled = cancel; }
     @Override public HandlerList getHandlers() { return HANDLERS; }
     public static HandlerList getHandlerList() { return HANDLERS; }
 }

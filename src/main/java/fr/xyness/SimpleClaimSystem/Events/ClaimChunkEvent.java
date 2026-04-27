@@ -1,5 +1,6 @@
 package fr.xyness.SimpleClaimSystem.Events;
 
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
 import fr.xyness.SimpleClaimSystem.Types.ChunkKey;
@@ -8,9 +9,9 @@ import fr.xyness.SimpleClaimSystem.Types.Claim;
 import java.util.UUID;
 
 /**
- * Called when a chunk is added to or removed from a claim.
+ * Called when a chunk is added to or removed from a claim. Cancellable.
  */
-public class ClaimChunkEvent extends ClaimEvent {
+public class ClaimChunkEvent extends ClaimEvent implements Cancellable {
 
     private static final HandlerList HANDLERS = new HandlerList();
 
@@ -20,6 +21,7 @@ public class ClaimChunkEvent extends ClaimEvent {
     private final ChunkKey chunkKey;
     private final Action action;
     private final UUID playerId;
+    private boolean cancelled;
 
     public ClaimChunkEvent(Claim claim, ChunkKey chunkKey, Action action, UUID playerId) {
         super(claim);
@@ -37,6 +39,8 @@ public class ClaimChunkEvent extends ClaimEvent {
     /** Gets the UUID of the player who performed the action. */
     public UUID getPlayerId() { return playerId; }
 
+    @Override public boolean isCancelled() { return cancelled; }
+    @Override public void setCancelled(boolean cancel) { this.cancelled = cancel; }
     @Override public HandlerList getHandlers() { return HANDLERS; }
     public static HandlerList getHandlerList() { return HANDLERS; }
 }

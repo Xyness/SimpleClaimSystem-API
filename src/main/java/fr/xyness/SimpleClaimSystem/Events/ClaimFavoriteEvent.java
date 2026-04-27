@@ -1,5 +1,6 @@
 package fr.xyness.SimpleClaimSystem.Events;
 
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
 import fr.xyness.SimpleClaimSystem.Types.Claim;
@@ -7,9 +8,9 @@ import fr.xyness.SimpleClaimSystem.Types.Claim;
 import java.util.UUID;
 
 /**
- * Called when a player favourites or unfavourites a claim.
+ * Called when a player favourites or unfavourites a claim. Cancellable.
  */
-public class ClaimFavoriteEvent extends ClaimEvent {
+public class ClaimFavoriteEvent extends ClaimEvent implements Cancellable {
 
 
     // **********
@@ -39,6 +40,9 @@ public class ClaimFavoriteEvent extends ClaimEvent {
 
     /** Whether the claim was favourited or unfavourited. */
     private final Action action;
+
+    /** Cancellation flag. */
+    private boolean cancelled;
 
 
     // ******************
@@ -79,6 +83,8 @@ public class ClaimFavoriteEvent extends ClaimEvent {
      */
     public Action getAction() { return action; }
 
+    @Override public boolean isCancelled() { return cancelled; }
+    @Override public void setCancelled(boolean cancel) { this.cancelled = cancel; }
     @Override public HandlerList getHandlers() { return HANDLERS; }
 
     /**

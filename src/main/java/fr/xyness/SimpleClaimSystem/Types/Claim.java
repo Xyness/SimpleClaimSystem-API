@@ -210,8 +210,15 @@ public class Claim {
     /** @param description The new description. */
     public void setDescription(String description) { this.description = description; }
 
-    /** @return The chunk keys that make up the claim. */
-    public Set<ChunkKey> getChunks() { return chunks; }
+    /**
+     * @return An unmodifiable view of the chunk keys that make up the claim. Mutations must go
+     *         through {@link #addChunk}, {@link #addChunks}, or {@link #removeChunk}; calling
+     *         remove/add on the returned set throws {@link UnsupportedOperationException}.
+     */
+    public Set<ChunkKey> getChunks() { return Collections.unmodifiableSet(chunks); }
+
+    /** @return The internal mutable chunk set. INTERNAL — do not expose to API consumers. */
+    public Set<ChunkKey> getChunksMutable() { return chunks; }
 
     /** @param chunks The new chunk set. */
     public void setChunks(Set<ChunkKey> chunks) { this.chunks = chunks; }
@@ -251,8 +258,14 @@ public class Claim {
     // *************
 
 
-    /** @return The members map, UUID to role name. */
-    public Map<UUID, String> getMembers() { return members; }
+    /**
+     * @return An unmodifiable view of the members map (UUID -> role name). Mutations must go
+     *         through {@link #addMember}, {@link #removeMember}, or related helpers.
+     */
+    public Map<UUID, String> getMembers() { return Collections.unmodifiableMap(members); }
+
+    /** @return The internal mutable members map. INTERNAL — do not expose to API consumers. */
+    public Map<UUID, String> getMembersMutable() { return members; }
 
     /** @param members The new members map. */
     public void setMembers(Map<UUID, String> members) { this.members = members; }
@@ -297,8 +310,15 @@ public class Claim {
         else memberExpirations.put(uuid, expiresAt);
     }
 
-    /** @return The map of member UUIDs to their membership expiration. Missing keys = permanent. */
-    public Map<UUID, LocalDateTime> getMemberExpirations() { return memberExpirations; }
+    /**
+     * @return An unmodifiable view of the member expiration map. Missing keys = permanent
+     *         membership. Mutations must go through {@link #addMember(UUID, String, LocalDateTime)}
+     *         or {@link #removeMember}.
+     */
+    public Map<UUID, LocalDateTime> getMemberExpirations() { return Collections.unmodifiableMap(memberExpirations); }
+
+    /** @return The internal mutable expirations map. INTERNAL — do not expose to API consumers. */
+    public Map<UUID, LocalDateTime> getMemberExpirationsMutable() { return memberExpirations; }
 
     /** @param memberExpirations The new expiration map; null resets to an empty map. */
     public void setMemberExpirations(Map<UUID, LocalDateTime> memberExpirations) {
@@ -360,8 +380,14 @@ public class Claim {
     // ************
 
 
-    /** @return The banned map, UUID to ban expiry timestamp. */
-    public Map<UUID, LocalDateTime> getBanned() { return banned; }
+    /**
+     * @return An unmodifiable view of the banned map. Mutations must go through
+     *         {@link #banPlayer} or {@link #unbanPlayer}.
+     */
+    public Map<UUID, LocalDateTime> getBanned() { return Collections.unmodifiableMap(banned); }
+
+    /** @return The internal mutable banned map. INTERNAL — do not expose to API consumers. */
+    public Map<UUID, LocalDateTime> getBannedMutable() { return banned; }
 
     /**
      * Returns the ban expiry for a given UUID.
@@ -406,8 +432,19 @@ public class Claim {
     // *****************
 
 
-    /** @return The permissions map, role name to permission map. */
-    public Map<String, Map<String, Boolean>> getPermissions() { return permissions; }
+    /**
+     * @return An unmodifiable view of the permissions map (role name -> permission map). The
+     *         inner role maps are also unmodifiable. Mutations must go through
+     *         {@link #setPermission}.
+     */
+    public Map<String, Map<String, Boolean>> getPermissions() {
+        Map<String, Map<String, Boolean>> view = new java.util.HashMap<>();
+        permissions.forEach((role, perms) -> view.put(role, Collections.unmodifiableMap(perms)));
+        return Collections.unmodifiableMap(view);
+    }
+
+    /** @return The internal mutable permissions map. INTERNAL — do not expose to API consumers. */
+    public Map<String, Map<String, Boolean>> getPermissionsMutable() { return permissions; }
 
     /**
      * Replaces the permission map. The input is defensively copied into thread-safe maps.
@@ -473,8 +510,13 @@ public class Claim {
     // ***********
 
 
-    /** @return The flags map. */
-    public Map<String,Boolean> getFlags() { return flags; }
+    /**
+     * @return An unmodifiable view of the flags map. Mutations must go through {@link #setFlag}.
+     */
+    public Map<String,Boolean> getFlags() { return Collections.unmodifiableMap(flags); }
+
+    /** @return The internal mutable flags map. INTERNAL — do not expose to API consumers. */
+    public Map<String,Boolean> getFlagsMutable() { return flags; }
 
     /**
      * Replaces the flags map with a defensive thread-safe copy.
@@ -505,8 +547,14 @@ public class Claim {
     // ******************
 
 
-    /** @return The miscellaneous claim-level metadata map. */
-    public Map<String,Object> getOtherThings() { return other_things; }
+    /**
+     * @return An unmodifiable view of the miscellaneous claim-level metadata map. Mutations must
+     *         go through {@link #setOtherThing}.
+     */
+    public Map<String,Object> getOtherThings() { return Collections.unmodifiableMap(other_things); }
+
+    /** @return The internal mutable metadata map. INTERNAL — do not expose to API consumers. */
+    public Map<String,Object> getOtherThingsMutable() { return other_things; }
 
     /**
      * Replaces the metadata map. Custom roles are re-read from the map to stay in sync.
@@ -540,8 +588,14 @@ public class Claim {
     // ******************
 
 
-    /** @return The custom role names list. */
-    public List<String> getCustomRoles() { return customRoles; }
+    /**
+     * @return An unmodifiable view of the custom role names list. Mutations must go through
+     *         {@link #addCustomRole} / {@link #removeCustomRole} / {@link #setCustomRoles}.
+     */
+    public List<String> getCustomRoles() { return Collections.unmodifiableList(customRoles); }
+
+    /** @return The internal mutable custom roles list. INTERNAL — do not expose to API consumers. */
+    public List<String> getCustomRolesMutable() { return customRoles; }
 
     /**
      * Replaces the custom role list. Always wraps into a thread-safe list because callers
