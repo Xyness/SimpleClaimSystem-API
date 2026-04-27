@@ -11,8 +11,10 @@ public final class SCS_API_Provider {
     // ***************
 
 
-	// API.
-    private static SCS_API api;
+	// API. volatile because register() is called once on the main thread during plugin enable,
+	// while get() can be called from any thread by other plugins — without volatile the JLS
+	// gives no visibility guarantees across threads.
+    private static volatile SCS_API api;
 
 
     // *****************

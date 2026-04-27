@@ -1,14 +1,22 @@
 # Version
-version: 2.3.3
+version: 2.3.4
 
 # Update date
-date: 26/04/2026
+date: 27/04/2026
 
 # Update notes
 update-notes:
-- "Fixed server crash on PlayerQuit when a player owned a very large claim (per-chunk Caffeine refresh saturated the cache executor and pinned the main thread)"
-- "Split INTERACT_LECTERN into INTERACT_LECTERN_READ (read books on a lectern) and INTERACT_LECTERN_TAKE (place / take books) so a public reading lectern can stay safe from visitors"
-- "Startup migration now removes obsolete permission and flag keys from saved claims and templates, not just adding the new ones"
-- "Custom roles inherit the claim's MEMBER row when new permission keys are added at startup"
-- "Per-subcommand permissions added to every /scs subcommand (importFromV1, web-token, update, transferLocal/Distant, resetPermissions/Flags*, resetpermission, resetflag, resetrole, ...) so admins can hand out granular access without scs.admin.*"
-- "Fixed /scs reload checking the wrong permission node (scs.claim.reload instead of scs.admin.reload)"
+- "API: ClaimCreate/Delete/Chunk/Member/Rename/PermissionChange/FlagChange/Merge/SpawnChange/DescriptionChange/Sale/OwnerTransfer/Favorite events are now Cancellable — other plugins can veto these operations"
+- "API: Claim.getMembers/getBanned/getPermissions/getFlags/getOtherThings/getChunks/getCustomRoles/getMemberExpirations now return unmodifiable views — go through Claim.addMember/setFlag/etc helpers to mutate"
+- "API: SCS_API_Provider.api is now volatile for safe cross-thread visibility"
+- "Hardened web dashboard: tokens stored hashed (SHA-256) on disk with one-shot migration, every POST action audit-logged with admin UUID + IP, warning at boot when cors-origins contains wildcard"
+- "Folia: TeleportPlayerPacketListener now wraps its entire handler in runEntityTask from packet entry, removing direct Bukkit API calls on the netty thread"
+- "DDL safety: migrateAddColumn/migrateAddIndex now refuse table names outside an explicit allowlist"
+- "ClaimTemplate save uses native UPSERT (ON CONFLICT / ON DUPLICATE KEY) — no more update-then-insert race"
+- "Audit log buffer flush is now configurable (audit-logs.flush-interval-seconds default 5, audit-logs.batch-size default 20)"
+- "Schema versioning table (scs_schema_version) created at boot for future migrations"
+- "Hikari leak detection threshold configurable (database.hikari.leak-detection-ms default 5000)"
+- "PlayerCache periodically purges CPlayer entries for offline UUIDs (avoids memory growth on long-running servers with admin dashboard activity)"
+- "Replaced ObjectInputStream with DataInputStream in GriefPrevention import for chunk pair parsing"
+- "Added EquipmentSlot.HAND guard on SettingsListener.onInteract to prevent double-fire from off-hand"
+- "Removed obsolete dependency-reduced-pom.xml leftover from older shade configuration"

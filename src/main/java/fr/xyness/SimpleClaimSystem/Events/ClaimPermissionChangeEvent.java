@@ -1,5 +1,6 @@
 package fr.xyness.SimpleClaimSystem.Events;
 
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.HandlerList;
 
 import fr.xyness.SimpleClaimSystem.Enums.ClaimRole;
@@ -8,15 +9,16 @@ import fr.xyness.SimpleClaimSystem.Types.Claim;
 import java.util.UUID;
 
 /**
- * Called when a claim permission is changed.
+ * Called when a claim permission is changed. Cancellable.
  */
-public class ClaimPermissionChangeEvent extends ClaimEvent {
+public class ClaimPermissionChangeEvent extends ClaimEvent implements Cancellable {
 
     private static final HandlerList HANDLERS = new HandlerList();
     private final String roleName;
     private final String permission;
     private final boolean value;
     private final UUID playerId;
+    private boolean cancelled;
 
     public ClaimPermissionChangeEvent(Claim claim, String roleName, String permission, boolean value, UUID playerId) {
         super(claim);
@@ -52,6 +54,8 @@ public class ClaimPermissionChangeEvent extends ClaimEvent {
     /** Gets the UUID of the player who changed the permission. */
     public UUID getPlayerId() { return playerId; }
 
+    @Override public boolean isCancelled() { return cancelled; }
+    @Override public void setCancelled(boolean cancel) { this.cancelled = cancel; }
     @Override public HandlerList getHandlers() { return HANDLERS; }
     public static HandlerList getHandlerList() { return HANDLERS; }
 }

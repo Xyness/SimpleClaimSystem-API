@@ -34,13 +34,23 @@ public interface SCS_API {
     /**
      * Gets a claim at the given chunk (synchronous).
      *
+     * <p><strong>When to use sync vs async:</strong></p>
+     * <ul>
+     *   <li>Inside Bukkit event listeners on hot paths (PlayerMoveEvent, BlockPhysicsEvent, etc.)
+     *       — the chunk is already loaded and the claim is almost certainly cached, so this call
+     *       is effectively O(1) and non-blocking.</li>
+     *   <li>Outside listeners (commands, scheduled tasks, GUI handlers, your own helper methods)
+     *       — prefer {@link #getClaimAsync(Chunk)}: the first call for a cold chunk may have to
+     *       hit the database, which would block the calling thread.</li>
+     * </ul>
+     *
      * @param chunk The chunk.
      * @return An Optional containing the Claim, or empty if unclaimed.
      */
     Optional<Claim> getClaim(Chunk chunk);
 
     /**
-     * Gets a claim at the given chunk (asynchronous).
+     * Gets a claim at the given chunk (asynchronous). Preferred outside hot-path event listeners.
      *
      * @param chunk The chunk.
      * @return A CompletableFuture wrapping an Optional Claim.
@@ -48,7 +58,8 @@ public interface SCS_API {
     CompletableFuture<Optional<Claim>> getClaimAsync(Chunk chunk);
 
     /**
-     * Gets a claim at the given chunk key (synchronous).
+     * Gets a claim at the given chunk key (synchronous). See {@link #getClaim(Chunk)} for
+     * sync vs async guidance.
      *
      * @param key The chunk key.
      * @return An Optional containing the Claim, or empty if unclaimed.
@@ -56,7 +67,7 @@ public interface SCS_API {
     Optional<Claim> getClaim(ChunkKey key);
 
     /**
-     * Gets a claim at the given chunk key (asynchronous).
+     * Gets a claim at the given chunk key (asynchronous). Preferred outside hot-path event listeners.
      *
      * @param key The chunk key.
      * @return A CompletableFuture wrapping an Optional Claim.
