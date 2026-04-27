@@ -426,7 +426,6 @@ SimpleClaimSystem fires custom Bukkit events for all claim actions. Listen to th
 | `ClaimExpireEvent` | Fired when a claim is auto-purged due to owner inactivity | No |
 | `ClaimEnterEvent` | Fired when a player enters a claim | Yes |
 | `ClaimLeaveEvent` | Fired when a player leaves a claim | No |
-| `ClaimTeleportEvent` | Fired when a player teleports to a claim spawn | Yes |
 | `ClaimMemberEvent` | Fired when a member is added, removed, kicked, banned, unbanned, promoted, demoted, or role changed | No |
 | `ClaimOwnerTransferEvent` | Fired when claim ownership is transferred | No |
 | `ClaimSaleEvent` | Fired when a claim is listed for sale, sale cancelled, or bought | No |

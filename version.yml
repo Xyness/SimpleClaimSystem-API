@@ -1,14 +1,22 @@
 # Version
-version: 2.3.3
+version: 2.3.4
 
 # Update date
-date: 26/04/2026
+date: 27/04/2026
 
 # Update notes
 update-notes:
-- "Fixed a crash on quit when a player owned a very large claim"
-- "Split INTERACT_LECTERN into INTERACT_LECTERN_READ and INTERACT_LECTERN_TAKE"
-- "The startup migration removes obsolete permission and flag keys from claims and templates"
-- "Custom roles inherit the claim MEMBER row when new permission keys are added"
-- "Added a permission per /scs subcommand, granular access without scs.admin.*"
-- "Fixed /scs reload checking scs.claim.reload instead of scs.admin.reload"
+- "Most claim events are cancellable now, create, delete, chunk, member, rename, flags, sale and transfer"
+- "Claim getters return read only views, mutate through addMember(), setFlag() or the API"
+- "Web dashboard tokens are stored hashed, existing tokens migrate on first load"
+- "Every dashboard action is logged with the admin UUID and IP"
+- "The dashboard warns at boot when cors-origins contains a wildcard"
+- "Fixed the Folia teleport packet handler calling the Bukkit API from the netty thread"
+- "Schema migrations refuse table names outside the plugin whitelist"
+- "Saving a template uses a native upsert instead of an update then insert"
+- "The audit log flush is configurable (audit-logs.flush-interval-seconds and batch-size)"
+- "Added the scs_schema_version table for future migrations"
+- "Connection leak detection is on by default (database.hikari.leak-detection-ms)"
+- "Cached data for offline players is dropped every 10 minutes"
+- "Fixed a race when two players saved a template with the same name at the same instant"
+- "Fixed PlayerInteract firing twice on right click"
