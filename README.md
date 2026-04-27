@@ -20,7 +20,7 @@ This module allows developers to integrate with SimpleClaimSystem from their own
     <dependency>
         <groupId>com.github.Xyness</groupId>
         <artifactId>SimpleClaimSystem-API</artifactId>
-        <version>v2.2.1</version>
+        <version>v2.3.4</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
@@ -34,7 +34,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.Xyness:SimpleClaimSystem-API:v2.2.1'
+    compileOnly 'com.github.Xyness:SimpleClaimSystem-API:v2.3.4'
 }
 ```
 
@@ -46,7 +46,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.Xyness:SimpleClaimSystem-API:v2.2.1")
+    compileOnly("com.github.Xyness:SimpleClaimSystem-API:v2.3.4")
 }
 ```
 
@@ -79,7 +79,8 @@ if (SCS_API_Provider.isRegistered()) {
 ```java
 import fr.xyness.SimpleClaimSystem.Types.Claim;
 
-// Synchronous
+// Synchronous — preferred inside Bukkit listeners on hot paths (PlayerMoveEvent, etc.)
+// because the chunk is already loaded and the claim is almost certainly cached.
 Optional<Claim> claim = api.getClaim(player.getLocation().getChunk());
 claim.ifPresent(c -> {
     String owner = c.getOwnerName();
@@ -87,7 +88,8 @@ claim.ifPresent(c -> {
     boolean canBuild = c.getPermission(c.getRole(player.getUniqueId()), "build");
 });
 
-// Asynchronous
+// Asynchronous — preferred outside listeners (commands, scheduled tasks, GUIs):
+// the first call for a cold chunk may hit the database, which would block the calling thread.
 api.getClaimAsync(chunk).thenAccept(opt -> {
     opt.ifPresent(c -> {
         // Handle claim
@@ -413,30 +415,59 @@ boolean canBuild = claim.getPermission("BUILDER", "place_block");
 
 Since v2.1.4, roles use `String` instead of `ClaimRole` enum throughout the API. Backward-compatible methods accepting `ClaimRole` are still available on the `Claim` class (`addMember`, `setPermission`, `getPermission`).
 
+## Mutating a Claim safely
+
+Since v2.3.4, every collection getter on `Claim` (`getMembers()`, `getBanned()`, `getPermissions()`, `getFlags()`, `getOtherThings()`, `getChunks()`, `getCustomRoles()`, `getMemberExpirations()`) returns an **unmodifiable view**. Calling `put`/`add`/`remove`/`clear` on the returned collection throws `UnsupportedOperationException`.
+
+To mutate state, go through the Claim helpers (or the `SCS_API` async methods, which also persist to DB and update caches):
+
+```java
+// ❌ Throws UnsupportedOperationException — the returned map is unmodifiable
+claim.getMembers().put(memberUuid, "MEMBER");
+
+// ✅ Use Claim helpers for in-memory edits (no persistence)
+claim.addMember(memberUuid, "MEMBER");
+claim.setFlag("pvp", false);
+claim.setPermission("MEMBER", "build", true);
+claim.banPlayer(uuid, LocalDateTime.now().plusDays(7));
+
+// ✅ Use SCS_API methods to persist to DB + update caches + fire events
+api.addMember(claim, memberUuid, "MEMBER");
+api.setFlag(claim, "pvp", false);
+api.setPermission(claim, "MEMBER", "build", true);
+api.banPlayer(claim, uuid, LocalDateTime.now().plusDays(7));
+```
+
+The `Claim` helpers are reserved for in-memory edits when you already know you'll persist later (or in batch). Most plugin integrations should call the `SCS_API` methods.
+
 ## Events
 
 SimpleClaimSystem fires custom Bukkit events for all claim actions. Listen to them in your plugin to react to claim changes.
 
 ### Available Events
 
+Since v2.3.4 most events are **fired before** the DB write / cache update, so cancelling them actually prevents the operation. The plugin will skip the entire side-effect chain (DAO write, cache invalidation, particles, Discord webhook, …) and surface a generic "claim-action-cancelled" message to the player.
+
 | Event | Description | Cancellable |
 |-------|-------------|:-----------:|
-| `ClaimCreateEvent` | Fired when a claim is created | No |
-| `ClaimDeleteEvent` | Fired when a claim is deleted | No |
-| `ClaimExpireEvent` | Fired when a claim is auto-purged due to owner inactivity | No |
+| `ClaimCreateEvent` | Fired when a claim is created | Yes |
+| `ClaimDeleteEvent` | Fired when a claim is deleted | Yes |
+| `ClaimExpireEvent` | Fired when a claim is auto-purged due to owner inactivity (post-fact) | No |
 | `ClaimEnterEvent` | Fired when a player enters a claim | Yes |
 | `ClaimLeaveEvent` | Fired when a player leaves a claim | No |
-| `ClaimMemberEvent` | Fired when a member is added, removed, kicked, banned, unbanned, promoted, demoted, or role changed | No |
-| `ClaimOwnerTransferEvent` | Fired when claim ownership is transferred | No |
-| `ClaimSaleEvent` | Fired when a claim is listed for sale, sale cancelled, or bought | No |
-| `ClaimRenameEvent` | Fired when a claim is renamed | No |
-| `ClaimDescriptionChangeEvent` | Fired when a claim description is changed | No |
-| `ClaimSpawnChangeEvent` | Fired when a claim spawn location is changed | No |
-| `ClaimFlagChangeEvent` | Fired when a claim flag is toggled | No |
-| `ClaimPermissionChangeEvent` | Fired when a claim permission is changed | No |
-| `ClaimChunkEvent` | Fired when a chunk is added to or removed from a claim | No |
-| `ClaimMergeEvent` | Fired when multiple claims are merged | No |
-| `ClaimFavoriteEvent` | Fired when a player favourites or unfavourites a claim | No |
+| `ClaimMemberEvent` | Fired when a member is added, removed, kicked, banned, unbanned, promoted, demoted, or role changed | Yes |
+| `ClaimOwnerTransferEvent` | Fired when claim ownership is transferred | Yes |
+| `ClaimSaleEvent` | Fired when a claim is listed for sale, sale cancelled, or bought | Yes |
+| `ClaimRenameEvent` | Fired when a claim is renamed | Yes |
+| `ClaimDescriptionChangeEvent` | Fired when a claim description is changed | Yes |
+| `ClaimSpawnChangeEvent` | Fired when a claim spawn location is changed | Yes |
+| `ClaimFlagChangeEvent` | Fired when a claim flag is toggled | Yes |
+| `ClaimPermissionChangeEvent` | Fired when a claim permission is changed | Yes |
+| `ClaimChunkEvent` | Fired when a chunk is added to or removed from a claim | Yes |
+| `ClaimMergeEvent` | Fired when multiple claims are merged | Yes |
+| `ClaimFavoriteEvent` | Fired when a player favourites or unfavourites a claim | Yes |
+
+> **Bulk operations** (kick from all claims, ban from all claims, …) fire one event per claim and only persist the claims whose event was *not* cancelled — your listener can selectively veto on a per-claim basis.
 
 ### Listening to Events
 
@@ -462,6 +493,27 @@ public class MyListener implements Listener {
         // Prevent entering if player is not allowed
         if (someCustomCheck(player, claim)) {
             event.setCancelled(true);
+        }
+    }
+
+    // Veto destructive operations from your own logic (anti-grief plugin, custom protection, …).
+    @EventHandler
+    public void onClaimDelete(ClaimDeleteEvent event) {
+        Claim claim = event.getClaim();
+        if (claim.getOwnerName().equalsIgnoreCase("ProtectedTownHall")) {
+            event.setCancelled(true);  // Plugin will skip the DB delete and cache invalidation entirely.
+        }
+    }
+
+    // Veto chunk additions outside a managed region.
+    @EventHandler
+    public void onClaimChunk(ClaimChunkEvent event) {
+        if (event.getAction() == ClaimChunkEvent.Action.ADD) {
+            int x = event.getChunkKey().getX();
+            int z = event.getChunkKey().getZ();
+            if (isInRestrictedZone(x, z)) {
+                event.setCancelled(true);
+            }
         }
     }
 
@@ -550,7 +602,7 @@ All events extend `ClaimEvent` which provides `getClaim()` to access the claim i
 ## Links
 
 - [BuiltByBit](https://builtbybit.com/resources/simpleclaimsystem.92437/)
-- [Javadoc](https://javadoc.jitpack.io/com/github/Xyness/SimpleClaimSystem-API/v2.1.8/javadoc/)
+- [Javadoc](https://javadoc.jitpack.io/com/github/Xyness/SimpleClaimSystem-API/v2.3.4/javadoc/)
 
 ## License
 
