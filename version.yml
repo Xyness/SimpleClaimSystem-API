@@ -1,11 +1,11 @@
 # Version
-version: 2.3.6
+version: 2.3.7
 
 # Update date
-date: 05/05/2026
+date: 08/05/2026
 
 # Update notes
 update-notes:
-- "Wired the per-role TELEPORT permission into a PlayerTeleportEvent listener: visitors can no longer teleport into claims that deny TELEPORT (covers /spawn, /tp, ender pearls, chorus fruit, the /claims GUI button, and plugin teleports)"
-- "Cost multiplier now applies from the 2nd chunk instead of the 3rd (chunk-cost x multiplier^(N-1))"
-- "Declared every scs.* permission node in plugin.yml (scs.bypass.*, scs.admin.*, scs.claim.*, scs.permission.*, scs.flag.*, scs.limit.*) for proper LuckPerms autocompletion and documentation"
+- "Added new gui to manage members role"
+- "Fixed fly issue"
+- "Fixed ban issue"
