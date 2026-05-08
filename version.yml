@@ -1,11 +1,11 @@
 # Version
-version: 2.3.6
+version: 2.3.7
 
 # Update date
-date: 05/05/2026
+date: 08/05/2026
 
 # Update notes
 update-notes:
-- "The TELEPORT permission is enforced on /spawn, /tp, pearls, chorus fruit and the /claims button"
-- "The cost multiplier applies from the second chunk instead of the third"
-- "Every scs.* permission node is declared in plugin.yml for LuckPerms autocompletion"
+- "Added new gui to manage members role"
+- "Fixed fly issue"
+- "Fixed ban issue"
