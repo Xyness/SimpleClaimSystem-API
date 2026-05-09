@@ -1,11 +1,11 @@
 # Version
-version: 2.3.7
+version: 2.3.8
 
 # Update date
-date: 08/05/2026
+date: 09/05/2026
 
 # Update notes
 update-notes:
-- "Added new gui to manage members role"
-- "Fixed fly issue"
-- "Fixed ban issue"
+- "Fixed selector gui menu issue"
+- "Added de_DE.yml in langs folder"
+- "Updated lang file (i recommend u to delete to regenerate to make sure you have the latest version)"
