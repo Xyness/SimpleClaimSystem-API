@@ -1,11 +1,11 @@
 # Version
-version: 2.3.8
+version: 2.3.9
 
 # Update date
 date: 09/05/2026
 
 # Update notes
 update-notes:
-- "Fixed selector gui menu issue"
-- "Added de_DE.yml in langs folder"
-- "Updated lang file (i recommend u to delete to regenerate to make sure you have the latest version)"
+- "Fixed cost in claim radius"
+- "Fixed add/set methods for max-claim-price"
+- "Added paid summary message when buying a claim / adding a chunk / claiming a chunk when cost > 0"
