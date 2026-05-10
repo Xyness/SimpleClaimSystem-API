@@ -1,11 +1,13 @@
 # Version
-version: 2.3.9
+version: 2.3.10
 
 # Update date
-date: 09/05/2026
+date: 10/05/2026
 
 # Update notes
 update-notes:
-- "Fixed cost in claim radius"
-- "Fixed add/set methods for max-claim-price"
-- "Added paid summary message when buying a claim / adding a chunk / claiming a chunk when cost > 0"
+- "Fixed Enter permission issue in listener"
+- "Added Leave permission (i recommend you to refresh your gui files)"
+- "Added configurable messages for discord webhook"
+- "Added /scs forceUnclaim [player] [claim] - scs.admin.forceunclaim"
+- "Added /scs forceDelchunk - scs.admin.forcedelchunk"
