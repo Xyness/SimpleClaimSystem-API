@@ -1,9 +1,14 @@
 # Version
-version: 2.3.12
+version: 2.4.0
 
 # Update date
 date: 10/05/2026
 
 # Update notes
 update-notes:
-- "Fixed minor fly issue"
+- "Replaced /scs web-token by /scs dashboard"
+- "Fixed dashboard token issue, now directly authentified"
+- "Fixed minor issue on the loading of settings of dashboard"
+- "Add timer for /claim auto-[cmd] - Example : /claim auto-claim 30 to auto-claim for 30 seconds"
+- "Fixed minor issue on bossbar + notifications when auto-xxx is enabled"
+- "Fixed minor issue on dashboard notifications"
