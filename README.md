@@ -20,7 +20,7 @@ This module allows developers to integrate with SimpleClaimSystem from their own
     <dependency>
         <groupId>com.github.Xyness</groupId>
         <artifactId>SimpleClaimSystem-API</artifactId>
-        <version>v2.3.4</version>
+        <version>v2.4.0</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
@@ -34,7 +34,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.Xyness:SimpleClaimSystem-API:v2.3.4'
+    compileOnly 'com.github.Xyness:SimpleClaimSystem-API:v2.4.0'
 }
 ```
 
@@ -46,7 +46,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.Xyness:SimpleClaimSystem-API:v2.3.4")
+    compileOnly("com.github.Xyness:SimpleClaimSystem-API:v2.4.0")
 }
 ```
 
@@ -466,6 +466,8 @@ Since v2.3.4 most events are **fired before** the DB write / cache update, so ca
 | `ClaimChunkEvent` | Fired when a chunk is added to or removed from a claim | Yes |
 | `ClaimMergeEvent` | Fired when multiple claims are merged | Yes |
 | `ClaimFavoriteEvent` | Fired when a player favourites or unfavourites a claim | Yes |
+| `ClaimWarpToggleEvent` | Fired when a claim's public-warp flag is about to flip | Yes |
+| `ClaimVisitEvent` | Fired when a player is about to teleport via `/claim visit` (after ban/warp-closed checks, before payment and TP) | Yes |
 
 > **Bulk operations** (kick from all claims, ban from all claims, …) fire one event per claim and only persist the claims whose event was *not* cancelled — your listener can selectively veto on a per-claim basis.
 
@@ -602,7 +604,7 @@ All events extend `ClaimEvent` which provides `getClaim()` to access the claim i
 ## Links
 
 - [BuiltByBit](https://builtbybit.com/resources/simpleclaimsystem.92437/)
-- [Javadoc](https://javadoc.jitpack.io/com/github/Xyness/SimpleClaimSystem-API/v2.3.4/javadoc/)
+- [Javadoc](https://javadoc.jitpack.io/com/github/Xyness/SimpleClaimSystem-API/v2.4.0/javadoc/)
 
 ## License
 
