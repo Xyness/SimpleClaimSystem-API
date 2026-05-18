@@ -1,10 +1,11 @@
 # Version
-version: 2.4.4
+version: 2.4.5
 
 # Update date
-date: 18/05/2026
+date: 19/05/2026
 
 # Update notes
 update-notes:
-- "Fixed ban minor issue"
-- "Fixed issues on few flags"
+- "Added NATURAL_HEALTH_REGEN permission"
+- "Fixed console spam issue due to mob stacker"
+- "Fixed tab completion issue with /scs"
