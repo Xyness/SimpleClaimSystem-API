@@ -9,3 +9,5 @@ update-notes:
 - "Added NATURAL_HEALTH_REGEN permission"
 - "Fixed console spam issue due to mob stacker"
 - "Fixed tab completion issue with /scs"
+- "Added VaultUnlocked support"
+- "Added item infos for players in /claim menu and /claim list"
