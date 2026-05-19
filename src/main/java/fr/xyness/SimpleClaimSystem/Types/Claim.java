@@ -220,8 +220,18 @@ public class Claim {
     /** @return The internal mutable chunk set. INTERNAL — do not expose to API consumers. */
     public Set<ChunkKey> getChunksMutable() { return chunks; }
 
-    /** @param chunks The new chunk set. */
-    public void setChunks(Set<ChunkKey> chunks) { this.chunks = chunks; }
+    /**
+     * Replaces the chunk set. Defensively copied into a concurrent set so cache loaders and
+     * other callers can pass a plain HashSet without losing thread safety on Folia region
+     * threads or async Caffeine refresh.
+     *
+     * @param chunks The new chunk set (null treated as empty).
+     */
+    public void setChunks(Set<ChunkKey> chunks) {
+        Set<ChunkKey> copy = ConcurrentHashMap.newKeySet();
+        if (chunks != null) copy.addAll(chunks);
+        this.chunks = copy;
+    }
 
     /** @param key The chunk to add. */
     public void addChunk(ChunkKey key) { chunks.add(key); }
@@ -267,8 +277,15 @@ public class Claim {
     /** @return The internal mutable members map. INTERNAL — do not expose to API consumers. */
     public Map<UUID, String> getMembersMutable() { return members; }
 
-    /** @param members The new members map. */
-    public void setMembers(Map<UUID, String> members) { this.members = members; }
+    /**
+     * Replaces the members map. Defensively copied into a {@link ConcurrentHashMap} so cache
+     * loaders and other callers can pass a plain HashMap without losing thread safety.
+     *
+     * @param members The new members map (null treated as empty).
+     */
+    public void setMembers(Map<UUID, String> members) {
+        this.members = (members == null) ? new ConcurrentHashMap<>() : new ConcurrentHashMap<>(members);
+    }
 
     /**
      * Adds a permanent member to the claim.
@@ -397,8 +414,15 @@ public class Claim {
      */
     public LocalDateTime getBanTime(UUID banUuid) { return banned.get(banUuid); }
 
-    /** @param banned The new banned map. */
-    public void setBanned(Map<UUID, LocalDateTime> banned) { this.banned = banned; }
+    /**
+     * Replaces the banned map. Defensively copied into a {@link ConcurrentHashMap} so cache
+     * loaders and other callers can pass a plain HashMap without losing thread safety.
+     *
+     * @param banned The new banned map (null treated as empty).
+     */
+    public void setBanned(Map<UUID, LocalDateTime> banned) {
+        this.banned = (banned == null) ? new ConcurrentHashMap<>() : new ConcurrentHashMap<>(banned);
+    }
 
     /**
      * Bans a player until the given date.
