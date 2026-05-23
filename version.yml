@@ -1,20 +1,10 @@
 # Version
-version: 2.5.0
+version: 2.5.1
 
 # Update date
 date: 23/05/2026
 
 # Update notes
 update-notes:
-- "Split TELEPORT into NATURAL_TELEPORT (pearls, chorus fruit, portals) and OTHER_TELEPORT (plugins and commands)"
-- "Existing claims migrate on their own, OTHER_TELEPORT is also checked at packet level for Folia"
-- "Added /scs manage-claim [action], every manage-claim action on the claim you stand in"
-- "Added /claim seenear [radius], the borders of every nearby claim coloured by ownership"
-- "Added /requnclaim, players can ask staff to unclaim a chunk or a claim, with a quota and a cooldown"
-- "Added /viewrequnclaim, the staff menu for pending unclaim requests"
-- "Fixed a NullPointerException when entering a claim with a custom role"
-- "Fixed the VaultUnlocked hook not working on Paper"
-- "Fixed the mace wind burst enchantment ignoring WIND_CHARGE_EXPLOSIONS"
-- "API: added FlagDefinition, PermissionDefinition and SCS_FlagRegistry for custom flags and permissions"
-- "API: custom keys are seeded on existing claims at startup and backfilled when registered at runtime"
-- "API: scs.bypass.<key>, scs.flag.<key> and scs.permission.<key> are registered automatically"
+- "Fixed GriefPrevention issue for the importation of claims"
+- "Fixed wind charges mace issue"
