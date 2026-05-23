@@ -20,7 +20,7 @@ This module allows developers to integrate with SimpleClaimSystem from their own
     <dependency>
         <groupId>com.github.Xyness</groupId>
         <artifactId>SimpleClaimSystem-API</artifactId>
-        <version>v2.4.6</version>
+        <version>v2.5.0</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
@@ -34,7 +34,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.Xyness:SimpleClaimSystem-API:v2.4.6'
+    compileOnly 'com.github.Xyness:SimpleClaimSystem-API:v2.5.0'
 }
 ```
 
@@ -46,7 +46,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.Xyness:SimpleClaimSystem-API:v2.4.6")
+    compileOnly("com.github.Xyness:SimpleClaimSystem-API:v2.5.0")
 }
 ```
 
@@ -377,6 +377,141 @@ public void onClaimFavorite(ClaimFavoriteEvent event) {
 | `getFavoriteClaimIds(UUID)` | Raw list of stored favourite ids |
 | `getFavoriteClaims(UUID)` | Resolved live claims (auto-cleans deleted ids) |
 
+## Custom flags & permissions (since v2.5.0)
+
+External plugins can declare their own claim flags and role-permissions. **Data-only**:
+SimpleClaimSystem stores the per-claim value and exposes it through `claim.getFlag(key)` /
+`claim.getPermission(role, key)`. **You** write the `@EventHandler` that checks the value and
+cancels the relevant events — SCS doesn't invoke any handler tied to your definition.
+
+### Registering a custom flag
+
+Register in your plugin's **`onLoad()`** so SCS's startup migration sees your flag and seeds
+the default value on existing claims. Registration in `onEnable` also works (the registry is
+mutable at runtime — SCS backfills cached claims and persists to DB), but any claims that
+loaded before the registration are missing the key until the next plugin reload.
+
+```java
+import fr.xyness.SimpleClaimSystem.API.FlagDefinition;
+import fr.xyness.SimpleClaimSystem.API.SCS_FlagRegistry;
+
+public class MyPlugin extends JavaPlugin {
+
+    @Override
+    public void onLoad() {
+        SCS_FlagRegistry.registerFlag(FlagDefinition.builder("my_flag")
+            .defaultValue(true)
+            // Optional: separate defaults for PROTECTED / SURVIVAL_REQUIRING_CLAIMS world modes.
+            .protectedModeDefault(false)
+            .survivalRequiringClaimsModeDefault(true)
+            // Optional metadata used by the GUI (titleKey/loreKey resolved against your lang
+            // file — SCS doesn't ship one for you, you provide the strings yourself).
+            .titleKey("my_flag-title")
+            .loreKey("my_flag-lore")
+            .iconMaterial("DIAMOND")
+            // Used in diagnostics + SCS_FlagRegistry.unregisterAllOwnedBy(pluginName).
+            .owningPluginName(getName())
+            .build());
+    }
+
+    @Override
+    public void onDisable() {
+        // Optional: clean up on reload. SCS will also clean up if your plugin is removed.
+        SCS_FlagRegistry.unregisterAllOwnedBy(getName());
+    }
+
+    // Your own event listener checks the flag and cancels the event.
+    @EventHandler
+    public void onSomething(SomeBukkitEvent event) {
+        SCS_API api = SCS_API_Provider.get();
+        api.getClaim(event.getLocation().getChunk()).ifPresent(claim -> {
+            if (!claim.getFlag("my_flag")) {
+                event.setCancelled(true);
+            }
+        });
+    }
+}
+```
+
+### Registering a custom role-permission
+
+Same shape, but with per-role defaults. The role names are matched case-insensitively
+(uppercase normalized).
+
+```java
+import fr.xyness.SimpleClaimSystem.API.PermissionDefinition;
+import fr.xyness.SimpleClaimSystem.API.SCS_FlagRegistry;
+
+@Override
+public void onLoad() {
+    SCS_FlagRegistry.registerPermission(PermissionDefinition.builder("my_perm")
+        .defaultPerRole("VISITOR", false)
+        .defaultPerRole("MEMBER", true)
+        .defaultPerRole("MODERATOR", true)
+        // Fallback for any role not explicitly listed (e.g. custom roles created by claim owners).
+        .fallbackDefault(false)
+        .titleKey("my_perm-title")
+        .loreKey("my_perm-lore")
+        .iconMaterial("DIAMOND")
+        .owningPluginName(getName())
+        .build());
+}
+
+@EventHandler
+public void onSomething(SomeBukkitEvent event) {
+    Player player = event.getPlayer();
+    SCS_API api = SCS_API_Provider.get();
+    api.getClaim(event.getLocation().getChunk()).ifPresent(claim -> {
+        String role = claim.getRole(player.getUniqueId());
+        if (!claim.getPermission(role, "my_perm")
+                && !player.hasPermission("scs.bypass.my_perm")) {
+            event.setCancelled(true);
+        }
+    });
+}
+```
+
+### Runtime registration via `SCS_API`
+
+If you need to register/unregister at runtime (not at `onLoad`), the same operations are
+mirrored on `SCS_API`:
+
+```java
+SCS_API api = SCS_API_Provider.get();
+api.registerCustomFlag(FlagDefinition.builder("dynamic").build());
+api.unregisterCustomFlag("dynamic");
+api.registerCustomPermission(PermissionDefinition.builder("dynamic_perm").build());
+api.unregisterCustomPermission("dynamic_perm");
+```
+
+Runtime registration triggers an immediate backfill on every cached claim (the default
+value is written to claims that don't yet have the key, batched into a single DB write).
+Runtime unregistration strips the key from cached claims.
+
+### Auto-registered Bukkit permissions
+
+When you register a custom key, SCS automatically declares the matching Bukkit permissions
+via `PluginManager.addPermission`:
+
+| Permission node                | Default | Purpose                                                                  |
+|--------------------------------|---------|--------------------------------------------------------------------------|
+| `scs.bypass.<key>`             | `op`    | Bypass the per-claim check (you read it in your own listener).            |
+| `scs.flag.<key>` (flags)       | `op`    | Allow toggling this flag in the GUI.                                      |
+| `scs.permission.<key>` (perms) | `op`    | Allow toggling this permission row in the GUI.                            |
+
+You don't need to declare these in your own `plugin.yml`. They're cleaned up on unregister.
+
+### Caveats
+
+- **Default value source-of-truth**: the `defaultValue` you pass to the builder is used to
+  seed claims that don't have your key yet. After that, the per-claim stored value wins —
+  changing your builder's default on the next plugin restart will NOT update existing claims.
+- **No automatic gating**: SCS doesn't call your code on any event. The flag is just a stored
+  boolean; you write the listener.
+- **No persistence of the definition itself**: only the per-claim value is stored in DB. If
+  your plugin is uninstalled and SCS restarts, the unknown key gets stripped at the next
+  startup migration (same behavior as a removed built-in flag).
+
 ## Roles
 
 SimpleClaimSystem supports **custom roles** in addition to the 4 default roles.
@@ -604,7 +739,7 @@ All events extend `ClaimEvent` which provides `getClaim()` to access the claim i
 ## Links
 
 - [BuiltByBit](https://builtbybit.com/resources/simpleclaimsystem.92437/)
-- [Javadoc](https://javadoc.jitpack.io/com/github/Xyness/SimpleClaimSystem-API/v2.4.6/javadoc/)
+- [Javadoc](https://javadoc.jitpack.io/com/github/Xyness/SimpleClaimSystem-API/v2.5.0/javadoc/)
 
 ## License
 
