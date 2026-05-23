@@ -547,4 +547,40 @@ public interface SCS_API {
      */
     List<Claim> getFavoriteClaims(UUID playerUuid);
 
+
+    // ******************************
+    // *  Custom flags / perms       *
+    // ******************************
+
+
+    /**
+     * Registers a custom flag at runtime. Equivalent to
+     * {@link SCS_FlagRegistry#registerFlag(FlagDefinition)} but additionally schedules the
+     * flag to be back-filled on existing claims (so older claims pick up the default value
+     * without waiting for a server restart).
+     *
+     * <p>Registration in {@code onLoad()} via {@link SCS_FlagRegistry} is preferred — it
+     * ensures the default value participates in the startup migration. Use this runtime path
+     * when adding flags after enable (e.g. configurable feature toggles).</p>
+     *
+     * @param definition The flag definition.
+     */
+    void registerCustomFlag(FlagDefinition definition);
+
+    /**
+     * Runtime unregister. Removes the definition and strips the flag's value from every
+     * claim (in-memory; DB writes happen asynchronously).
+     */
+    void unregisterCustomFlag(String key);
+
+    /**
+     * Runtime register for a custom role-permission. See
+     * {@link #registerCustomFlag(FlagDefinition)} for the registration timing rules — the
+     * same caveat applies.
+     */
+    void registerCustomPermission(PermissionDefinition definition);
+
+    /** Runtime unregister of a custom role-permission. */
+    void unregisterCustomPermission(String key);
+
 }
