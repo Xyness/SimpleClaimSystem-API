@@ -1,10 +1,12 @@
 # Version
-version: 2.5.1
+version: 2.5.2
 
 # Update date
-date: 23/05/2026
+date: 25/05/2026
 
 # Update notes
 update-notes:
-- "Fixed GriefPrevention issue for the importation of claims"
-- "Fixed wind charges mace issue"
+- "Fixed issue in the importation from V1"
+- "Added placeholder %scs_fly_formatted% to show fly time in a great format"
+- "x3 the time of particles of the /claim seenear"
+- "Added discord webhook messages for /requnclaim"
