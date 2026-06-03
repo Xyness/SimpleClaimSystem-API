@@ -1,13 +1,9 @@
 # Version
-version: 2.5.6
+version: 2.5.7
 
 # Update date
 date: 03/06/2026
 
 # Update notes
 update-notes:
-- "Added /scs socialspy to spy on claim chat (/cc)"
-- "Fixed WorldGuard wrongly blocking claims when no flag is set"
-- "Fixed claim border particles being offset"
-- "Fixed fly/elytra players being sent to the sanction location instead of pushed back at claim borders"
-- "Fixed auto-purge running multiple times after a reload"
+- "Fixed /scs docs and /claim docs"
