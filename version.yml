@@ -1,10 +1,12 @@
 # Version
-version: 2.5.8
+version: 2.5.9
 
 # Update date
-date: 04/06/2026
+date: 06/06/2026
 
 # Update notes
 update-notes:
-- "Separated /claim kick into two commands"
-- "Added /claim remove (due to first change)""
+- "Split the damage-entities permission into Damage Hostile and Damage Passive"
+- "Added /scs player * to set or add a limit for every player at once"
+- "Added an option to auto-delete excess claims/chunks when a player's max is lowered"
+- "Fixed a crash when opening the player admin menu on older player data"
