@@ -91,7 +91,7 @@ public final class PermissionDefinition {
 
     @Override
     public int hashCode() {
-        return Objects.hash(key);
+        return Objects.hashCode(key);
     }
 
     public static final class Builder {
