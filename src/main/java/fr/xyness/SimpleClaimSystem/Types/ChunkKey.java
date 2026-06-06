@@ -3,7 +3,6 @@ package fr.xyness.SimpleClaimSystem.Types;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 
-import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -17,7 +16,7 @@ public class ChunkKey {
     // ***************
 
 
-	// UUID of the world of the chunk.
+    // UUID of the world of the chunk.
     private final UUID worldId;
 
     // X of the chunk.
@@ -25,6 +24,9 @@ public class ChunkKey {
 
     // Z of the chunk.
     private final int z;
+
+    // Cached hash code of the chunk key.
+    private final int hash;
 
 
     // ******************
@@ -43,6 +45,10 @@ public class ChunkKey {
         this.worldId = worldId;
         this.x = x;
         this.z = z;
+        int h = worldId.hashCode();
+        h = 31 * h + x;
+        h = 31 * h + z;
+        this.hash = h;
     }
 
     /**
@@ -108,7 +114,7 @@ public class ChunkKey {
 
     @Override
     public int hashCode() {
-        return Objects.hash(worldId, x, z);
+        return hash;
     }
 
     @Override
