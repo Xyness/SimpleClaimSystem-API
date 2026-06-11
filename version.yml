@@ -1,11 +1,18 @@
 # Version
-version: 2.5.10
+version: 2.5.11
 
 # Update date
-date: 07/06/2026
+date: 11/06/2026
 
 # Update notes
 update-notes:
-- "Reworked the claim tax / rent system: configurable taxation period (any duration), auto-derived check frequency, and accurate database-wide billing"
-- "Fixed a crash (NullPointerException) when clicking inside the permissions and flags menus"
-- "Reduced memory allocations in hot paths (chunk lookups, liquid flow) to lower GC pressure"
+- "Reworked the tax & rent system — pick any billing period, with accurate server-wide billing"
+- "New permission to stop visitors picking your glow berries"
+- "QuickShop shops now work for visitors without handing them the sign permission"
+- "Public warps now show even when the owner is offline"
+- "Spectators no longer count as online in menus and placeholders"
+- "Claims and chunks over your limit are now cleaned up when you log in, with a heads-up message"
+- "Multishot crossbows can no longer slip past mob and armor stand protection"
+- "Claims now draw their real shape on Pl3xMap and squaremap, no more overlapping neighbors"
+- "Fixed a crash when clicking in the flags and permissions menus"
+- "Lighter on memory in a few hot spots"
