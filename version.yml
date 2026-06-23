@@ -1,24 +1,11 @@
 # Version
-version: 2.6.0
+version: 2.6.1
 
 # Update date
-date: 15/06/2026
+date: 23/06/2026
 
 # Update notes
 update-notes:
-- "New chunk cost modes: exponential, linear or fixed pricing via claims.economy.cost-mode"
-- "Discord webhooks: define multiple named webhooks and route each event to the one(s) you choose"
-- "New claim spawn holograms: a configurable floating info panel (members, chunks, flags, permissions, sale… with placeholders, PlaceholderAPI and conditional lines) shown near each claim"
-- "Claim borders can now briefly appear when you enter a claim (optional; green = yours, yellow = member, pink = protected area, red = other)"
-- "Auto-map can now display as a live Folia-safe scoreboard sidebar that refreshes as you move (claims.auto-map.display: SCOREBOARD or CHAT)"
-- "Claim settings menu: manage the sale & price, public-warp visit price, the per-claim hologram, the icon (right-click an inventory item) and role creation directly in the GUI"
-- "Chat prefix: all plugin chat messages now carry a configurable, colourable prefix (the prefix key in each language file, set it to \"\" to disable)"
-- "Fixed being able to list a claim for sale with /claim sell while the economy is disabled"
-- "Fixed /claim kick not actually removing the player from the claim"
-- "Fixed claims not showing on Pl3xMap/dynmap/BlueMap/squaremap until a /scs reload after a restart"
-- "Fixed PlaceholderAPI placeholders sometimes staying dead until /scs reload after an update"
-- "Fixed /scs resetAllPlayerSettings error that could leave the plugin stuck in maintenance mode"
-- "Fixed packetevents never being initialised, which kept packet-based features (teleport detection, holograms) from working"
-- "Newly-claimed land is now protected instantly, with no brief window where it could read as unclaimed"
-- "Redis cache: fixed a crash on claims with expired bans and a possible player-data stall"
-- "Performance & cleanup: lighter Redis bulk writes and claim particles, leaner code, cleaner shutdown"
+- "Added support for 26.2"
+- "Added possibility to moderators to manage banned/members/chunks from claims (when they are moderators in the claims)"
+- "Fixed a minor issue on /scs command"
