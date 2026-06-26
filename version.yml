@@ -1,9 +1,9 @@
 # Version
-version: 2.6.2
+version: 2.6.3
 
 # Update date
 date: 26/06/2026
 
 # Update notes
 update-notes:
-- "Added PvPManager hook, players can not enter claims when they are in combat"
+- "Fixed NoSuchMethodError and NoClassDefFoundError on 26.2 MC Version"
