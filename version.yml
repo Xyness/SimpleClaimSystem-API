@@ -1,11 +1,9 @@
 # Version
-version: 2.6.1
+version: 2.6.2
 
 # Update date
-date: 23/06/2026
+date: 26/06/2026
 
 # Update notes
 update-notes:
-- "Added support for 26.2"
-- "Added possibility to moderators to manage banned/members/chunks from claims (when they are moderators in the claims)"
-- "Fixed a minor issue on /scs command"
+- "Added PvPManager hook, players can not enter claims when they are in combat"
