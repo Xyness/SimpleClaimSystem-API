@@ -1,10 +1,9 @@
 # Version
-version: 2.6.4
+version: 2.6.5
 
 # Update date
 date: 28/06/2026
 
 # Update notes
 update-notes:
-- "Added COMMAND_TELEPORT permission for members, moderators & custom roles"
-- "Added /claim tp <owner>:<claim> for members of a claim"
+- "Fixed minor issue on teleportation"
