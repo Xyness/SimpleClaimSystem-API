@@ -1,13 +1,18 @@
 # Version
-version: 2.6.6
+version: 2.6.7
 
 # Update date
-date: 02/07/2026
+date: 15/07/2026
 
 # Update notes
 update-notes:
-- "Fixed permission claim/chunk limits being ignored (scs.limit.chunks.* now grants unlimited)"
-- "Fixed spawner/block chunk-limit false positives caused by in-memory counter drift"
-- "Added pay-to-claim beyond the chunk limit (claims.economy.pay-over-limit)"
-- "Added configurable /claim see particle duration (claims.see-duration-seconds)"
-- "Added per-event Discord webhook toggles (discord-webhook.events)"
+- "Fixed MONSTERS_SPAWN not blocking slimes, magma cubes, ghasts, shulkers and other Enemy-type mobs"
+- "Fixed items dropped across a claim border being unpickable until leaving and re-entering the chunk"
+- "Fixed a ClassCastException crash when clicking in the banned-players menu"
+- "Fixed 'Failed to schedule Folia located task' console spam and improved its error logging"
+- "Fixed banned players bypassing bans via nether/end portals, ender pearls and teleports"
+- "Fixed false 'chunk limit reached' on spawner/block placement (in-memory counter drift now self-heals)"
+- "Added INTERACT_CRAFTER permission to control crafter access inside claims"
+- "Added claim tax notifications (claims.tax.notify): console log + owner message on each charge"
+- "Added particle border performance settings (claims.particles.*): view-distance limit, update interval and density"
+- "Chunk-limit message now shows usage (%chunks%/%max-chunks%, all claims combined)"
