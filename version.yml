@@ -1,18 +1,13 @@
 # Version
-version: 2.6.7
+version: 2.6.8
 
 # Update date
-date: 15/07/2026
+date: 17/07/2026
 
 # Update notes
 update-notes:
-- "Fixed MONSTERS_SPAWN not blocking slimes, magma cubes, ghasts, shulkers and other Enemy-type mobs"
-- "Fixed items dropped across a claim border being unpickable until leaving and re-entering the chunk"
-- "Fixed a ClassCastException crash when clicking in the banned-players menu"
-- "Fixed 'Failed to schedule Folia located task' console spam and improved its error logging"
-- "Fixed banned players bypassing bans via nether/end portals, ender pearls and teleports"
-- "Fixed false 'chunk limit reached' on spawner/block placement (in-memory counter drift now self-heals)"
-- "Added INTERACT_CRAFTER permission to control crafter access inside claims"
-- "Added claim tax notifications (claims.tax.notify): console log + owner message on each charge"
-- "Added particle border performance settings (claims.particles.*): view-distance limit, update interval and density"
-- "Chunk-limit message now shows usage (%chunks%/%max-chunks%, all claims combined)"
+- "Fixed respawn-in-claim, claim-back.only-own-claims and confirmation.owner being ignored"
+- "Fixed claims.default.warp, visitPrice and hologram being ignored"
+- "Fixed database.hikari.leak-detection-ms and the audit-logs settings being ignored"
+- "Fixed the Home button in claim menus requiring the obsolete scs.claim.home permission"
+- "Added the missing scs.bypass.interact_glow_berries node"
