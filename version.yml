@@ -1,13 +1,10 @@
 # Version
-version: 2.6.8
+version: 2.6.9
 
 # Update date
-date: 17/07/2026
+date: 18/07/2026
 
 # Update notes
 update-notes:
-- "Fixed respawn-in-claim, claim-back.only-own-claims and confirmation.owner being ignored"
-- "Fixed claims.default.warp, visitPrice and hologram being ignored"
-- "Fixed database.hikari.leak-detection-ms and the audit-logs settings being ignored"
-- "Fixed the Home button in claim menus requiring the obsolete scs.claim.home permission"
-- "Added the missing scs.bypass.interact_glow_berries node"
+- "Fixed /claim delchunk removing a chunk that belonged to another claim"
+- "Added playtime based bonus claims and chunks (players.playtime-limits), disabled by default"
