@@ -1,10 +1,9 @@
 # Version
-version: 2.6.9
+version: 2.6.10
 
 # Update date
 date: 18/07/2026
 
 # Update notes
 update-notes:
-- "Fixed /claim delchunk removing a chunk that belonged to another claim"
-- "Added playtime based bonus claims and chunks (players.playtime-limits), disabled by default"
+- "Fixed claim border particles staying displayed after an admin unclaimed the claim"
