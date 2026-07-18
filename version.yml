@@ -1,10 +1,9 @@
 # Version
-version: 2.6.9
+version: 2.6.10
 
 # Update date
 date: 18/07/2026
 
 # Update notes
 update-notes:
-- "Security fix: /claim delchunk <claim> could remove the protection of a chunk belonging to another player (and, on older databases, hand it over) when executed while standing on that chunk. Delchunk now verifies the target chunk actually belongs to the named claim before touching it."
-- "New: playtime-based bonus limits. Players can now earn extra claims and/or chunks the longer they have played (configure under players.playtime-limits in config.yml). Disabled by default; the bonus is added on top of the permission/default limit and only ever raises a finite limit."
+- "Fix: a claim's border particles could stay displayed permanently after an admin unclaimed it through the /scs player-management GUI (single claim or delete-all) or /scs forceunclaim. The borders are now properly removed when the claim is deleted."
