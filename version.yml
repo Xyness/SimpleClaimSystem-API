@@ -1,9 +1,16 @@
 # Version
-version: 2.6.10
+version: 2.6.11
 
 # Update date
-date: 18/07/2026
+date: 28/07/2026
 
 # Update notes
 update-notes:
-- "Fixed claim border particles staying displayed after an admin unclaimed the claim"
+- "Fixed a NullPointerException on the sell boss bar for the first sale after a start or reload"
+- "Fixed playtime rewards not being granted when every-hours was a decimal value"
+- "Added the playtime bonus to the player info menu, shown as (+N) next to the totals"
+- "Fixed addchunk-instead-if-possible failing when the claim limit was already reached"
+- "Fixed an off by one that could block buying a claim for sale or transferring chunks"
+- "Fixed auto-delchunk, auto-addchunk and auto-merge spamming once the target claim was gone"
+- "Fixed an internal reload closing the database while background tasks were still running"
+- "Fixed the Error parsing time stamp and Failed to warm unclaim request cache errors at startup"
