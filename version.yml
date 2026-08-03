@@ -1,16 +1,23 @@
 # Version
-version: 2.6.11
+version: 2.7.0
 
 # Update date
-date: 28/07/2026
+date: 03/08/2026
 
 # Update notes
 update-notes:
-- "Fixed a NullPointerException on the sell boss bar for the first sale after a start or reload"
-- "Fixed playtime rewards not being granted when every-hours was a decimal value"
-- "Added the playtime bonus to the player info menu, shown as (+N) next to the totals"
-- "Fixed addchunk-instead-if-possible failing when the claim limit was already reached"
-- "Fixed an off by one that could block buying a claim for sale or transferring chunks"
-- "Fixed auto-delchunk, auto-addchunk and auto-merge spamming once the target claim was gone"
-- "Fixed an internal reload closing the database while background tasks were still running"
-- "Fixed the Error parsing time stamp and Failed to warm unclaim request cache errors at startup"
+- "Fixed a duplication exploit when a stacked pile was picked up with a full inventory"
+- "Stacked amounts are stored on the item itself and every pickup moves an exact amount"
+- "Fixed items being duplicated when a mob took them from a stacked pile (piglins, allays)"
+- "Fixed banned players entering a claim by walking or flying backwards"
+- "Added the CREATE_PORTAL permission, a portal opened by a traveller is checked in the destination claim"
+- "Added the IGNITE_PORTAL permission, candles and campfires use INTERACT_CANDLE and INTERACT_CAMPFIRE"
+- "Fixed FIRE_IGNITE blocking players from lighting portals, candles and campfires with no message"
+- "FIRE_IGNITE only covers natural causes now (lava, lightning, fire spread, dispensers)"
+- "Fixed beds doing nothing in the Nether and the End when BED_EXPLOSIONS was disabled"
+- "Fixed sculk spreading in a claim with SCULK_SPREAD disabled by dying next to a catalyst"
+- "Added max-chunks-cap and max-claims-cap to limit how far vote rewards can raise a limit"
+- "Added max-chunks-per-claim and scs.limit.chunks-per-claim.<n> to limit the size of one claim"
+- "Added allow-player-claims per world, /parea and free building outside claims still work"
+- "Fixed the Oraxen hook failing on recent Oraxen versions"
+- "Added the missing denial messages for crafters and beacon effects"
