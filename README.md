@@ -20,7 +20,7 @@ This module allows developers to integrate with SimpleClaimSystem from their own
     <dependency>
         <groupId>com.github.Xyness</groupId>
         <artifactId>SimpleClaimSystem-API</artifactId>
-        <version>v2.5.10</version>
+        <version>v2.7.1</version>
         <scope>provided</scope>
     </dependency>
 </dependencies>
@@ -34,7 +34,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'com.github.Xyness:SimpleClaimSystem-API:v2.5.10'
+    compileOnly 'com.github.Xyness:SimpleClaimSystem-API:v2.7.1'
 }
 ```
 
@@ -46,7 +46,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.github.Xyness:SimpleClaimSystem-API:v2.5.10")
+    compileOnly("com.github.Xyness:SimpleClaimSystem-API:v2.7.1")
 }
 ```
 
@@ -303,6 +303,7 @@ public void onClaimFavorite(ClaimFavoriteEvent event) {
 | `getClaimNamesByOwner(UUID)` | Sync | Get claim names by owner |
 | `getClaimMembers(UUID, String)` | Sync | Get members of a claim |
 | `getClaimBanned(UUID, String)` | Sync | Get banned players of a claim |
+| `getClaim(Location)` | Sync | Get the claim covering a location *(2.7.1)* |
 
 ### Claim Modification
 
@@ -317,6 +318,35 @@ public void onClaimFavorite(ClaimFavoriteEvent event) {
 | `unbanPlayer(Claim, UUID)` | Unban a player from a claim |
 | `setPermission(Claim, String, String, boolean)` | Set a permission for a role |
 | `setFlag(Claim, String, boolean)` | Set a flag value |
+
+The member and ban methods fire `ClaimMemberEvent` (since 2.7.1); when a listener cancels it the returned future completes without any change.
+
+### Claim Lifecycle *(2.7.1)*
+
+Applies the configured defaults, fires the matching events and writes every table in one transaction. Player limits, world rules and economy are **not** checked — the caller decides who may create what.
+
+| Method | Description |
+|--------|-------------|
+| `createClaim(UUID, String, String, Chunk)` | Create a claim on one chunk (`%n` in the name = lowest free number). Empty when the chunk is taken or a listener vetoed it |
+| `deleteClaim(Claim)` | Delete a claim and release all its chunks |
+| `addChunk(Claim, Chunk)` | Add a chunk to a claim |
+| `removeChunk(Claim, Chunk)` | Remove a chunk (removing the last one deletes the claim) |
+| `setSpawnLocation(Claim, Location)` | Move the claim's teleport point (must be inside the claim) |
+| `setClaimName(Claim, String)` | Rename a claim (name must be free for that owner) |
+| `setDescription(Claim, String)` | Change the description |
+| `createRole(Claim, String)` | Create a custom role, seeded from the claim's MEMBER permissions |
+| `deleteRole(Claim, String)` | Delete a custom role; its members fall back to MEMBER |
+
+### Warps & Economy *(2.7.1)*
+
+| Method | Description |
+|--------|-------------|
+| `isWarpOpen(Claim)` | Whether the claim is open as a public warp |
+| `setWarp(Claim, boolean)` | Open or close the public warp (fires `ClaimWarpToggleEvent`) |
+| `getVisitPrice(Claim)` / `setVisitPrice(Claim, double)` | Price a visitor pays the owner per `/claim visit` |
+| `getOpenWarpOwners()` | Every owner with at least one open warp |
+| `isForSale(Claim)` / `getSalePrice(Claim)` | Sale state of the claim |
+| `setForSale(Claim, boolean, double)` | List or unlist a claim (fires `ClaimSaleEvent`) |
 
 ### Claim Checks
 
@@ -353,14 +383,21 @@ public void onClaimFavorite(ClaimFavoriteEvent event) {
 | `getCostMultiplier(Player)` | Cost multiplier |
 | `getChunkCount(UUID)` | Current chunk count |
 | `getClaimCount(UUID)` | Current claim count |
+| `getMaxChunksPerClaim(Player)` | Max chunks in a single claim *(2.7.1)* |
+| `getMaxRoles(Player)` | Max custom roles per claim *(2.7.1)* |
+| `getTeleportDelay(Player)` | Teleport delay in seconds *(2.7.1)* |
+| `getMinDistance(Player)` | Minimum chunk distance between claims *(2.7.1)* |
+| `getFlyTime(UUID)` | Remaining claim-fly seconds *(2.7.1)* |
 
 ### World & Settings
 
 | Method | Description |
 |--------|-------------|
 | `getWorldMode(World)` | Get world mode |
-| `getSettingsForProtectedMode()` | Default permissions for Protected mode |
-| `getSettingsForSurvivalRequiringClaimsMode()` | Default permissions for SRC mode |
+| `getPermissionsForProtectedMode()` | Permissions applied outside claims in PROTECTED worlds *(renamed in 2.7.1, used to return null)* |
+| `getPermissionsForSurvivalRequiringClaimsMode()` | Same for SURVIVAL_REQUIRING_CLAIMS worlds |
+| `getFlagsForProtectedMode()` | Flags applied outside claims in PROTECTED worlds *(2.7.1)* |
+| `getFlagsForSurvivalRequiringClaimsMode()` | Same for SURVIVAL_REQUIRING_CLAIMS worlds *(2.7.1)* |
 | `getSetting(String)` | Get raw setting value |
 | `getBooleanSetting(String, boolean)` | Get boolean setting |
 | `getStringSetting(String, String)` | Get string setting |
@@ -587,7 +624,7 @@ Since v2.3.4 most events are **fired before** the DB write / cache update, so ca
 |-------|-------------|:-----------:|
 | `ClaimCreateEvent` | Fired when a claim is created | Yes |
 | `ClaimDeleteEvent` | Fired when a claim is deleted | Yes |
-| `ClaimExpireEvent` | Fired when a claim is auto-purged due to owner inactivity (post-fact) | No |
+| `ClaimExpireEvent` | Fired for each claim the auto-purge is about to delete for owner inactivity. Fired off the main thread. *(now actually fired, and cancellable, since 2.7.1)* | Yes |
 | `ClaimEnterEvent` | Fired when a player enters a claim | Yes |
 | `ClaimLeaveEvent` | Fired when a player leaves a claim | No |
 | `ClaimMemberEvent` | Fired when a member is added, removed, kicked, banned, unbanned, promoted, demoted, or role changed | Yes |
@@ -603,6 +640,7 @@ Since v2.3.4 most events are **fired before** the DB write / cache update, so ca
 | `ClaimFavoriteEvent` | Fired when a player favourites or unfavourites a claim | Yes |
 | `ClaimWarpToggleEvent` | Fired when a claim's public-warp flag is about to flip | Yes |
 | `ClaimVisitEvent` | Fired when a player is about to teleport via `/claim visit` (after ban/warp-closed checks, before payment and TP) | Yes |
+| `ClaimTaxEvent` | Fired once per owner and per tax run, before the money moves. `setAmount()` adjusts the bill, cancelling skips the run and leaves the owner's meter untouched. Fired off the main thread, does **not** extend `ClaimEvent`. *(2.7.1)* | Yes |
 
 > **Bulk operations** (kick from all claims, ban from all claims, …) fire one event per claim and only persist the claims whose event was *not* cancelled — your listener can selectively veto on a per-claim basis.
 
@@ -651,6 +689,22 @@ public class MyListener implements Listener {
             if (isInRestrictedZone(x, z)) {
                 event.setCancelled(true);
             }
+        }
+    }
+
+    // Halve the claim tax during a week-end event, or exempt a rank entirely.
+    @EventHandler
+    public void onClaimTax(ClaimTaxEvent event) {
+        if (isWeekend()) {
+            event.setAmount(event.getAmount() / 2);
+        }
+    }
+
+    // Keep a claim alive even when its owner has been away for months.
+    @EventHandler
+    public void onClaimExpire(ClaimExpireEvent event) {
+        if (isProtectedFromPurge(event.getClaim())) {
+            event.setCancelled(true);
         }
     }
 
@@ -739,7 +793,7 @@ All events extend `ClaimEvent` which provides `getClaim()` to access the claim i
 ## Links
 
 - [BuiltByBit](https://builtbybit.com/resources/simpleclaimsystem.92437/)
-- [Javadoc](https://javadoc.jitpack.io/com/github/Xyness/SimpleClaimSystem-API/v2.5.10/javadoc/)
+- [Javadoc](https://javadoc.jitpack.io/com/github/Xyness/SimpleClaimSystem-API/v2.7.1/javadoc/)
 
 ## License
 

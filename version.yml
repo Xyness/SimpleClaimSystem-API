@@ -1,23 +1,32 @@
 # Version
-version: 2.7.0
+version: 2.7.1
 
 # Update date
-date: 03/08/2026
+date: 12/08/2026
 
 # Update notes
 update-notes:
-- "Fixed a duplication exploit when a stacked pile was picked up with a full inventory"
-- "Stacked amounts are stored on the item itself and every pickup moves an exact amount"
-- "Fixed items being duplicated when a mob took them from a stacked pile (piglins, allays)"
-- "Fixed banned players entering a claim by walking or flying backwards"
-- "Added the CREATE_PORTAL permission, a portal opened by a traveller is checked in the destination claim"
-- "Added the IGNITE_PORTAL permission, candles and campfires use INTERACT_CANDLE and INTERACT_CAMPFIRE"
-- "Fixed FIRE_IGNITE blocking players from lighting portals, candles and campfires with no message"
-- "FIRE_IGNITE only covers natural causes now (lava, lightning, fire spread, dispensers)"
-- "Fixed beds doing nothing in the Nether and the End when BED_EXPLOSIONS was disabled"
-- "Fixed sculk spreading in a claim with SCULK_SPREAD disabled by dying next to a catalyst"
-- "Added max-chunks-cap and max-claims-cap to limit how far vote rewards can raise a limit"
-- "Added max-chunks-per-claim and scs.limit.chunks-per-claim.<n> to limit the size of one claim"
-- "Added allow-player-claims per world, /parea and free building outside claims still work"
-- "Fixed the Oraxen hook failing on recent Oraxen versions"
-- "Added the missing denial messages for crafters and beacon effects"
+- "Fixed any interaction made with an empty hand on an entity bypassing every claim permission"
+- "Visitors could open the inventory of horses, donkeys, mules, llamas and camels in a claim"
+- "Fixed a duplication exploit with the item stacker on servers where items stack above 64"
+- "Item merging is handled by the plugin now, and stored amounts correct themselves"
+- "Added the INTERACT_MOUNT_INVENTORY permission, claims inherit their INTERACT_ENTITY value"
+- "Fixed the untamed mount check ignoring donkeys, mules, llamas and camels"
+- "Fixed /claim visit charging the visitor and then refusing the teleport"
+- "The visit price is taken once the teleport happened, a visit cancelled by moving costs nothing"
+- "ENTITY_TELEPORT, CROP_GROWTH, MUSHROOM_SPREAD, OBSERVER_TRIGGER, EXP_DROP, NATURAL_BREEDING and TRIAL_CHAMBER_SPAWN are enforced"
+- "The BREED_ENTITY and TAME_ENTITY permissions are enforced too"
+- "Removed DESTROY_ENTITY, DAMAGE_HOSTILE and DAMAGE_PASSIVE already cover it"
+- "Turning MOB_AI off no longer removes gravity, mobs keep physics and knockback"
+- "SLEEP is checked on the chunk of the bed, and on both of its halves"
+- "Added claims.teleport.plugin-teleports (STRICT, CONSENT or TRUST) for /tpa, /home and /warp"
+- "Added claims.combat.block-entry (PVP_DISABLED_CLAIMS, ALL_CLAIMS or NONE) with include-members and block-teleports"
+- "Added scs.limit.warps.<n> and claims.warps.max-warps to cap the public warps a player may keep"
+- "Added scs.limit.min-visit-price.<value> and claims.warps.min-visit-price"
+- "Added scs.limit.tax-multiplier.<value> and claims.tax.default-multiplier, 0 exempts a rank"
+- "Added the ClaimTaxEvent and made ClaimExpireEvent cancellable, it was never fired either"
+- "API: added claim creation and deletion, chunks, spawn, name, description, custom roles, warps and getClaim(Location)"
+- "API: the member and ban methods fire ClaimMemberEvent like the commands do"
+- "Fixed getSettingsForProtectedMode() and getSettingsForSurvivalRequiringClaimsMode() returning null"
+- "Fixed claims.auto-purge.warn-days-before being ignored, and three refusals that were silent"
+- "Claim lookups run when a player changes chunk, not on every block walked"
