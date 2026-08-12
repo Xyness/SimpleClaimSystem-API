@@ -6,5 +6,4 @@ date: 12/08/2026
 
 # Update notes
 update-notes:
-- "Fixed players taking no damage outside claims in survival mode, introduced in 2.7.1"
-- "The INVINCIBLE flag is read from the claims that enable it, not from unclaimed chunks"
+- "Fix critical issue on invincible flag"
