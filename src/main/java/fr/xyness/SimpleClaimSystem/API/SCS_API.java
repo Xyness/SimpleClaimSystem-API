@@ -83,6 +83,15 @@ public interface SCS_API {
     Map<ChunkKey, Optional<Claim>> getClaims(Set<ChunkKey> keys);
 
     /**
+     * Gets the claim covering the given location (synchronous). Convenience wrapper around the
+     * chunk lookup. See {@link #getClaim(Chunk)} for sync vs async guidance.
+     *
+     * @param location The location.
+     * @return An Optional containing the Claim, or empty if unclaimed.
+     */
+    Optional<Claim> getClaim(Location location);
+
+    /**
      * Gets a claim by its owner's UUID and claim name (synchronous).
      *
      * @param ownerUuid The owner's UUID.
@@ -142,7 +151,8 @@ public interface SCS_API {
 
     /**
      * Adds a member to a claim (asynchronous).
-     * Persists to database and updates cache.
+     * Persists to database and updates cache. Fires {@code ClaimMemberEvent}; when a listener
+     * cancels it the returned future completes without any change.
      *
      * @param claim The claim.
      * @param memberUuid The UUID of the member to add.
@@ -163,7 +173,8 @@ public interface SCS_API {
 
     /**
      * Removes a member from a claim (asynchronous).
-     * Persists to database and updates cache.
+     * Persists to database and updates cache. Fires {@code ClaimMemberEvent}; when a listener
+     * cancels it the returned future completes without any change.
      *
      * @param claim The claim.
      * @param memberUuid The UUID of the member to remove.
@@ -181,7 +192,8 @@ public interface SCS_API {
     CompletableFuture<Void> removeMemberFromAllClaims(UUID ownerUuid, UUID memberUuid);
 
     /**
-     * Changes the role of a member in a claim (asynchronous).
+     * Changes the role of a member in a claim (asynchronous). Fires {@code ClaimMemberEvent};
+     * when a listener cancels it the returned future completes without any change.
      *
      * @param claim The claim.
      * @param memberUuid The UUID of the member.
@@ -191,7 +203,8 @@ public interface SCS_API {
     CompletableFuture<Void> setMemberRole(Claim claim, UUID memberUuid, String newRole);
 
     /**
-     * Bans a player from a claim (asynchronous).
+     * Bans a player from a claim (asynchronous). Fires {@code ClaimMemberEvent} with
+     * {@code Action.BAN}; when a listener cancels it the returned future completes without any change.
      *
      * @param claim The claim.
      * @param playerUuid The UUID of the player to ban.
@@ -201,7 +214,8 @@ public interface SCS_API {
     CompletableFuture<Void> banPlayer(Claim claim, UUID playerUuid, LocalDateTime expiration);
 
     /**
-     * Unbans a player from a claim (asynchronous).
+     * Unbans a player from a claim (asynchronous). Fires {@code ClaimMemberEvent} with
+     * {@code Action.UNBAN}; when a listener cancels it the returned future completes without any change.
      *
      * @param claim The claim.
      * @param playerUuid The UUID of the player to unban.
@@ -229,6 +243,179 @@ public interface SCS_API {
      * @return A CompletableFuture that completes when the operation is done.
      */
     CompletableFuture<Void> setFlag(Claim claim, String flag, boolean value);
+
+
+    // **************************
+    // *  Claim - Lifecycle    *
+    // **************************
+
+
+    /**
+     * Creates a claim on a single chunk (asynchronous).
+     *
+     * <p>Applies the configured default permissions, flags and metadata, fires
+     * {@code ClaimCreateEvent} (cancellable) and writes every table in one transaction. Player
+     * limits, world rules and economy are <strong>not</strong> checked — this is the integration
+     * entry point, the caller decides who may create what.</p>
+     *
+     * @param ownerUuid The owner's UUID.
+     * @param ownerName The owner's name (stored for display).
+     * @param claimName The claim name; {@code %n} is resolved to the lowest free number for this owner.
+     * @param chunk The chunk to claim.
+     * @return A future resolving to the created claim, or empty when the chunk was already claimed
+     *         or a listener cancelled the creation.
+     */
+    CompletableFuture<Optional<Claim>> createClaim(UUID ownerUuid, String ownerName, String claimName, Chunk chunk);
+
+    /**
+     * Deletes a claim entirely (asynchronous): every chunk is released, members and bans are
+     * dropped, and {@code ClaimDeleteEvent} is fired.
+     *
+     * @param claim The claim to delete.
+     * @return A future resolving to true when the claim was deleted.
+     */
+    CompletableFuture<Boolean> deleteClaim(Claim claim);
+
+    /**
+     * Adds a chunk to an existing claim (asynchronous). Fires {@code ClaimChunkEvent}.
+     *
+     * @param claim The claim.
+     * @param chunk The chunk to add.
+     * @return A future resolving to false when the chunk already belongs to a claim or the event
+     *         was cancelled.
+     */
+    CompletableFuture<Boolean> addChunk(Claim claim, Chunk chunk);
+
+    /**
+     * Removes a chunk from a claim (asynchronous). Removing the last chunk deletes the claim.
+     * Fires {@code ClaimChunkEvent}.
+     *
+     * @param claim The claim.
+     * @param chunk The chunk to remove.
+     * @return A future resolving to false when the chunk is not part of the claim or the event
+     *         was cancelled.
+     */
+    CompletableFuture<Boolean> removeChunk(Claim claim, Chunk chunk);
+
+    /**
+     * Sets the teleport spawn of a claim (asynchronous). Fires {@code ClaimSpawnChangeEvent}.
+     *
+     * @param claim The claim.
+     * @param location The new spawn location; must be inside the claim.
+     * @return A future resolving to false when the location is outside the claim or the event was
+     *         cancelled.
+     */
+    CompletableFuture<Boolean> setSpawnLocation(Claim claim, Location location);
+
+    /**
+     * Renames a claim (asynchronous). Fires {@code ClaimRenameEvent}.
+     *
+     * @param claim The claim.
+     * @param name The new name; must be unique for that owner.
+     * @return A future resolving to false when the name is already taken or the event was cancelled.
+     */
+    CompletableFuture<Boolean> setClaimName(Claim claim, String name);
+
+    /**
+     * Sets the description of a claim (asynchronous). Fires {@code ClaimDescriptionChangeEvent}.
+     *
+     * @param claim The claim.
+     * @param description The new description.
+     * @return A future resolving to false when the event was cancelled.
+     */
+    CompletableFuture<Boolean> setDescription(Claim claim, String description);
+
+    /**
+     * Creates a custom role on a claim (asynchronous), seeded from the claim's own MEMBER
+     * permissions — the same behaviour as {@code /claim role create}.
+     *
+     * @param claim The claim.
+     * @param roleName The role name (upper-cased; must not collide with a built-in role).
+     * @return A future resolving to false when the role already exists or the name is reserved.
+     */
+    CompletableFuture<Boolean> createRole(Claim claim, String roleName);
+
+    /**
+     * Deletes a custom role from a claim (asynchronous). Members holding it fall back to MEMBER.
+     *
+     * @param claim The claim.
+     * @param roleName The role name.
+     * @return A future resolving to false when the role does not exist or is a built-in role.
+     */
+    CompletableFuture<Boolean> deleteRole(Claim claim, String roleName);
+
+
+    // *****************************
+    // *  Claim - Warps & economy  *
+    // *****************************
+
+
+    /**
+     * Tells whether the claim is open as a public warp.
+     *
+     * @param claim The claim.
+     * @return True when anyone can {@code /claim visit} it.
+     */
+    boolean isWarpOpen(Claim claim);
+
+    /**
+     * Opens or closes the public warp of a claim (asynchronous). Fires {@code ClaimWarpToggleEvent}.
+     *
+     * @param claim The claim.
+     * @param open True to open the warp.
+     * @return A future resolving to false when the event was cancelled.
+     */
+    CompletableFuture<Boolean> setWarp(Claim claim, boolean open);
+
+    /**
+     * Gets the price a visitor pays the owner on each {@code /claim visit}.
+     *
+     * @param claim The claim.
+     * @return The visit price; 0 when free.
+     */
+    double getVisitPrice(Claim claim);
+
+    /**
+     * Sets the visit price of a claim (asynchronous).
+     *
+     * @param claim The claim.
+     * @param price The new price; negative values are clamped to 0.
+     * @return A future that completes when the operation is done.
+     */
+    CompletableFuture<Void> setVisitPrice(Claim claim, double price);
+
+    /**
+     * Gets every owner with at least one open public warp.
+     *
+     * @return An unmodifiable set of owner UUIDs.
+     */
+    Set<UUID> getOpenWarpOwners();
+
+    /**
+     * Tells whether the claim is currently listed for sale.
+     *
+     * @param claim The claim.
+     * @return True when listed.
+     */
+    boolean isForSale(Claim claim);
+
+    /**
+     * Gets the sale price of a claim.
+     *
+     * @param claim The claim.
+     * @return The price; 0 when not listed.
+     */
+    double getSalePrice(Claim claim);
+
+    /**
+     * Lists or unlists a claim for sale (asynchronous). Fires {@code ClaimSaleEvent}.
+     *
+     * @param claim The claim.
+     * @param forSale True to list it.
+     * @param price The asking price; ignored when unlisting.
+     * @return A future resolving to false when the event was cancelled.
+     */
+    CompletableFuture<Boolean> setForSale(Claim claim, boolean forSale, double price);
 
 
     // *********************
@@ -422,6 +609,46 @@ public interface SCS_API {
      */
     int getClaimCount(UUID playerId);
 
+    /**
+     * Gets how many chunks a single claim of this player may hold. 0 = unlimited.
+     *
+     * @param player The player.
+     * @return The per-claim chunk limit.
+     */
+    int getMaxChunksPerClaim(Player player);
+
+    /**
+     * Gets how many custom roles a claim of this player may hold. 0 = unlimited.
+     *
+     * @param player The player.
+     * @return The custom-role limit.
+     */
+    int getMaxRoles(Player player);
+
+    /**
+     * Gets the teleport delay (in seconds) applied to this player before a claim teleport.
+     *
+     * @param player The player.
+     * @return The delay in seconds; 0 = instant.
+     */
+    int getTeleportDelay(Player player);
+
+    /**
+     * Gets the minimum chunk distance required between this player's claims and other players'.
+     *
+     * @param player The player.
+     * @return The minimum distance in chunks.
+     */
+    int getMinDistance(Player player);
+
+    /**
+     * Gets the remaining claim-fly time of a player, in seconds.
+     *
+     * @param playerId The player's UUID.
+     * @return The remaining seconds; 0 when none.
+     */
+    long getFlyTime(UUID playerId);
+
 
     // ***********************
     // *  World - Settings  *
@@ -437,18 +664,32 @@ public interface SCS_API {
     WorldMode getWorldMode(World world);
 
     /**
-     * Gets the default permissions for Protected mode.
+     * Gets the permissions applied OUTSIDE any claim in worlds using PROTECTED mode.
      *
-     * @return A map of permission key to boolean value.
+     * @return An unmodifiable map of permission key to value.
      */
-    Map<String, Boolean> getSettingsForProtectedMode();
+    Map<String, Boolean> getPermissionsForProtectedMode();
 
     /**
-     * Gets the default permissions for Survival Requiring Claims mode.
+     * Gets the permissions applied OUTSIDE any claim in worlds using SURVIVAL_REQUIRING_CLAIMS mode.
      *
-     * @return A map of permission key to boolean value.
+     * @return An unmodifiable map of permission key to value.
      */
-    Map<String, Boolean> getSettingsForSurvivalRequiringClaimsMode();
+    Map<String, Boolean> getPermissionsForSurvivalRequiringClaimsMode();
+
+    /**
+     * Gets the flags applied OUTSIDE any claim in worlds using PROTECTED mode.
+     *
+     * @return An unmodifiable map of flag key to value.
+     */
+    Map<String, Boolean> getFlagsForProtectedMode();
+
+    /**
+     * Gets the flags applied OUTSIDE any claim in worlds using SURVIVAL_REQUIRING_CLAIMS mode.
+     *
+     * @return An unmodifiable map of flag key to value.
+     */
+    Map<String, Boolean> getFlagsForSurvivalRequiringClaimsMode();
 
     /**
      * Gets a plugin setting value.
