@@ -1,32 +1,10 @@
 # Version
-version: 2.7.1
+version: 2.7.2
 
 # Update date
 date: 12/08/2026
 
 # Update notes
 update-notes:
-- "Fixed any interaction made with an empty hand on an entity bypassing every claim permission"
-- "Visitors could open the inventory of horses, donkeys, mules, llamas and camels in a claim"
-- "Fixed a duplication exploit with the item stacker on servers where items stack above 64"
-- "Item merging is handled by the plugin now, and stored amounts correct themselves"
-- "Added the INTERACT_MOUNT_INVENTORY permission, claims inherit their INTERACT_ENTITY value"
-- "Fixed the untamed mount check ignoring donkeys, mules, llamas and camels"
-- "Fixed /claim visit charging the visitor and then refusing the teleport"
-- "The visit price is taken once the teleport happened, a visit cancelled by moving costs nothing"
-- "ENTITY_TELEPORT, CROP_GROWTH, MUSHROOM_SPREAD, OBSERVER_TRIGGER, EXP_DROP, NATURAL_BREEDING and TRIAL_CHAMBER_SPAWN are enforced"
-- "The BREED_ENTITY and TAME_ENTITY permissions are enforced too"
-- "Removed DESTROY_ENTITY, DAMAGE_HOSTILE and DAMAGE_PASSIVE already cover it"
-- "Turning MOB_AI off no longer removes gravity, mobs keep physics and knockback"
-- "SLEEP is checked on the chunk of the bed, and on both of its halves"
-- "Added claims.teleport.plugin-teleports (STRICT, CONSENT or TRUST) for /tpa, /home and /warp"
-- "Added claims.combat.block-entry (PVP_DISABLED_CLAIMS, ALL_CLAIMS or NONE) with include-members and block-teleports"
-- "Added scs.limit.warps.<n> and claims.warps.max-warps to cap the public warps a player may keep"
-- "Added scs.limit.min-visit-price.<value> and claims.warps.min-visit-price"
-- "Added scs.limit.tax-multiplier.<value> and claims.tax.default-multiplier, 0 exempts a rank"
-- "Added the ClaimTaxEvent and made ClaimExpireEvent cancellable, it was never fired either"
-- "API: added claim creation and deletion, chunks, spawn, name, description, custom roles, warps and getClaim(Location)"
-- "API: the member and ban methods fire ClaimMemberEvent like the commands do"
-- "Fixed getSettingsForProtectedMode() and getSettingsForSurvivalRequiringClaimsMode() returning null"
-- "Fixed claims.auto-purge.warn-days-before being ignored, and three refusals that were silent"
-- "Claim lookups run when a player changes chunk, not on every block walked"
+- "Fixed players taking no damage outside claims in survival mode, introduced in 2.7.1"
+- "The INVINCIBLE flag is read from the claims that enable it, not from unclaimed chunks"
