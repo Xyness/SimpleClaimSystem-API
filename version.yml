@@ -7,3 +7,9 @@ date: 12/08/2026
 # Update notes
 update-notes:
 - "Fix critical issue on invincible flag"
+- "Fixed the item stacker losing part of a pile when it was picked up"
+- "Fixed the mob stacker merging other plugins pets away"
+- "Mobs that are carried, invisible or marked to never despawn are left alone on both sides of a merge"
+- "Slimes of different sizes are no longer stacked together"
+- "Trial chamber mobs are never stacked"
+- "Fixed a NoSuchMethodError from the slime split handler on some forks"
