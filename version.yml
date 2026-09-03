@@ -1,15 +1,32 @@
 # Version
-version: 2.7.2
+version: 2.8-Beta
 
 # Update date
-date: 12/08/2026
+date: 03/09/2026
 
 # Update notes
 update-notes:
-- "Fix critical issue on invincible flag"
-- "Fixed the item stacker losing part of a pile when it was picked up"
-- "Fixed the mob stacker merging other plugins pets away"
-- "Mobs that are carried, invisible or marked to never despawn are left alone on both sides of a merge"
-- "Slimes of different sizes are no longer stacked together"
-- "Trial chamber mobs are never stacked"
-- "Fixed a NoSuchMethodError from the slime split handler on some forks"
+- "Fixed ClaimTaxEvent never firing for other plugins"
+- "No more sneaking into no-entry claims on a boat"
+- "GUIs and /claim back now respect the claim's teleport setting"
+- "New scs.limit.bypass permission, so staff can use /scs without unlimited limits"
+- "Bad limit permissions (like scs.limit.chunks.10k) now warn in console"
+- "New /scs player <name> limits to see where a player's limits come from"
+- "Earned claim and chunk bonuses no longer vanish on logout"
+- "You can now disable or rename the base commands in the config"
+- "Command aliases need the same permission as the real command"
+- "Web dashboard locked down: localhost by default, token revoke, stricter security"
+- "Web dashboard: you must be online with permission to edit or delete claims"
+- "Fixed a rare item dupe in menus, purchases and taxes are now safe on Folia"
+- "Fixed a Folia freeze when running some commands from console"
+- "Big performance pass on particles, holograms and movement checks"
+- "Redis now supports TLS and usernames"
+- "Data transfers now keep templates, unclaim requests and temporary invites"
+- "Database pool errors are logged again"
+- "Claim names can no longer inject formatting into holograms and web maps"
+- "Dashboard avatars show up again"
+- "Multi-server support: with a shared Redis, claims, players, holograms and warps sync between servers in real time"
+- "Multi-server: taxes and auto-purge only run on one server, no more double charges"
+- "Multi-server: fixed a few changes (merge, transfer, expired invites) that stayed on one server"
+- "Auto-purge leaves you alone if you just logged back in on another server"
+- "New scs.purge.bypass permissions to protect ranks from the auto-purge"
