@@ -1,18 +1,9 @@
 # Version
-version: 2.8.1
+version: 2.8.2
 
 # Update date
 date: 21/09/2026
 
 # Update notes
 update-notes:
-- "New optional /claim menu showing the chunks around you"
-- "New option to prevent claiming Trial Chambers"
-- "New /claim tax command: see your tax details and pay what is due"
-- "New placeholders: players inside a claim, claim area, claim rank"
-- "PASSIVE_ENTITY_GRIEF now shows up in the flags menu on updated servers"
-- "Bedrock players can now toggle the claim hologram and use /claim settings"
-- "Playtime bonus now displays correctly in the player info"
-- "%scs_remaining_chunks% and %scs_remaining_claims% now follow permissions and the playtime bonus"
-- "Mojang API timeouts are no longer reported as errors"
-- "Vanished staff no longer appear online in claim menus and holograms"
+- "Fixed an error when claims were removed automatically (unpaid tax, auto-purge, API)"
