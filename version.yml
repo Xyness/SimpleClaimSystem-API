@@ -1,12 +1,12 @@
 # Version
-version: 2.8.3
+version: 2.8.4
 
 # Update date
-date: 15/10/2026
+date: 24/10/2026
 
 # Update notes
 update-notes:
-- "Fixed the MySQL startup failure"
-- "Fixed the flag CROSS_REDSTONE in certain modes"
-- "Fixed auto-purge system"
-- "Added /scs purge info <player> and /scs purge run (scs.admin.purge)"
+- "Fixed claim fly staying enabled outside claims"
+- "Fixed duplicate player insert error on login"
+- "Fixed plugin left half-loaded after a startup or reload error"
+- "Fixed claim.fly.infinite bypassing no-fly claims"
